@@ -1,0 +1,43 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "package.json"
+
+jobs:
+  check-version:
+    name: Check Version Bump
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if version was bumped
+        run: |
+          # Get the version from the PR branch
+          PR_VERSION=$(node -p "require('./package.json').version")
+
+          # Get the version from main branch
+          git fetch origin main
+          git checkout origin/main -- package.json
+          MAIN_VERSION=$(node -p "require('./package.json').version")
+          git checkout - -- package.json
+
+          echo "Main branch version: $MAIN_VERSION"
+          echo "PR branch version: $PR_VERSION"
+
+          if [ "$PR_VERSION" == "$MAIN_VERSION" ]; then
+            echo "⚠️ Warning: Version in package.json was not bumped!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Current version: \`$PR_VERSION\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please update the version in package.json before merging." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ Version bumped from $MAIN_VERSION to $PR_VERSION" >> $GITHUB_STEP_SUMMARY
+          fi

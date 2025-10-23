@@ -1,0 +1,47 @@
+# Set default behavior for all files
+* text=auto
+
+# Text files that should have normalized line endings (LF) in the repository
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+
+# Ensure shell scripts are executable
+*.sh eol=lf
+scripts/*.sh eol=lf
+
+# Documentation
+*.md text eol=lf
+LICENSE text eol=lf
+CHANGELOG.md text eol=lf
+README.md text eol=lf
+CONTRIBUTING.md text eol=lf
+
+# Config files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.npmignore text eol=lf
+.prettierrc text eol=lf
+.prettierignore text eol=lf
+tsconfig.json text eol=lf
+package.json text eol=lf
+pnpm-lock.yaml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.ttf binary
+
