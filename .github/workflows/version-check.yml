@@ -10,6 +10,8 @@ jobs:
   check-version:
     name: Check Version Bump
     runs-on: ubuntu-latest
+    # Skip this check for the automated "Version Packages" PR
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
 
     steps:
       - name: Checkout code
@@ -41,8 +43,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Current version: \`$PR_VERSION\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Please update the version in package.json before merging." >> $GITHUB_STEP_SUMMARY
-            exit 1
+            echo "This is expected if you're using changesets. The version will be bumped automatically in the 'Version Packages' PR." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Did you create a changeset? Run: \`pnpm changeset\`" >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ Version bumped from $MAIN_VERSION to $PR_VERSION" >> $GITHUB_STEP_SUMMARY
           fi

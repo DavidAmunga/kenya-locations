@@ -8,6 +8,14 @@
   "types": "dist/index.d.ts",
   "author": "David Amunga <https://davidamunga.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidAmunga/kenya-locations.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DavidAmunga/kenya-locations/issues"
+  },
+  "homepage": "https://kenya-locations.web.app",
   "files": [
     "dist"
   ],
@@ -42,6 +50,7 @@
     "fuse.js": "^7.1.0"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
     "@eslint/js": "^9.27.0",
     "@typescript-eslint/eslint-plugin": "^8.32.1",

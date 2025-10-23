@@ -1,0 +1,121 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release_branch:
+        description: "Create release branch (e.g., release/v0.2.0)"
+        required: false
+        type: boolean
+        default: true
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish:
+    name: Build & Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm lint
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Build package
+        run: pnpm build
+
+      - name: Validate data
+        run: pnpm validate
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Get package version
+        id: package_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create release branch
+        if: inputs.create_release_branch
+        run: |
+          BRANCH_NAME="release/v${{ steps.package_version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+          echo "Created release branch: $BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish to npm
+        id: publish
+        run: |
+          pnpm changeset:publish
+          echo "published=true" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          VERSION="${{ steps.package_version.outputs.version }}"
+          TAG="v$VERSION"
+
+          # Extract changelog for this version
+          CHANGELOG_CONTENT=$(sed -n "/## $VERSION/,/## /p" CHANGELOG.md | sed '$ d' | tail -n +2)
+
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT="Release v$VERSION - See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
+          fi
+
+          # Create GitHub release
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "$CHANGELOG_CONTENT" \
+            --verify-tag || true
+
+          echo "## 📦 Published to npm" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** kenya-locations" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Links" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 [npm Package](https://www.npmjs.com/package/kenya-locations)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎉 [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/$TAG)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌿 [Release Branch](https://github.com/${{ github.repository }}/tree/release/v$VERSION)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changelog" >> $GITHUB_STEP_SUMMARY
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Successfully published kenya-locations@${{ steps.package_version.outputs.version }}!" >> $GITHUB_STEP_SUMMARY

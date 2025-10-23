@@ -455,29 +455,59 @@ interface SearchResult {
 
 Contributions are welcome! We especially welcome contributions to expand our locality and area data.
 
-📖 **[Read our detailed Contributing Guidelines](CONTRIBUTING.md)** for information on:
+**[Read our detailed Contributing Guidelines](CONTRIBUTING.md)** for information on:
 
 - How to add new counties, sub-counties, constituencies, wards, localities, and areas
 - Data structure and validation requirements
 - Testing procedures
 - Submission guidelines
 
-🪝 **Pre-commit Hooks**: This project uses automated pre-commit hooks to ensure code quality and
-data integrity. When you commit changes, the following happen automatically:
+**Pre-commit Hooks**: This project uses automated pre-commit hooks to ensure code quality and data
+integrity. When you commit changes, the following happen automatically:
 
 - Code formatting and linting
 - Data validation (when data files are changed)
 - Test execution
 - Commit message format validation
 
-📋 **Learn More**: See [Pre-commit Hooks Documentation](docs/PRE_COMMIT_HOOKS.md) for detailed
+**Learn More**: See [Pre-commit Hooks Documentation](docs/PRE_COMMIT_HOOKS.md) for detailed
 information.
 
 Please feel free to submit a Pull Request following our guidelines.
 
+## Community
+
+### Get Help & Discuss
+
+- [GitHub Discussions](https://github.com/DavidAmunga/kenya-locations/discussions) - Ask questions,
+  share ideas
+- [Report Issues](https://github.com/DavidAmunga/kenya-locations/issues/new/choose) - Bug reports,
+  feature requests
+- [Documentation](./CONTRIBUTING.md) - Contributing guidelines
+
+### Code of Conduct
+
+We are committed to providing a welcoming and inclusive environment. Please read our
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Security
+
+Found a security vulnerability? Please review our [Security Policy](SECURITY.md) for responsible
+disclosure.
+
+### Contributors
+
+Thanks to all our contributors! See the full list in [CONTRIBUTORS.md](CONTRIBUTORS.md).
+
+Want to contribute? Check out:
+
+- [Good First Issues](https://github.com/DavidAmunga/kenya-locations/labels/good%20first%20issue)
+- [Data Contributions](https://kenya-locations.web.app/)
+- [Contributing Guide](CONTRIBUTING.md)
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Data Sources
 
@@ -492,3 +522,21 @@ The data in this package is sourced from official records of:
 - The Independent Electoral and Boundaries Commission (IEBC) of Kenya
 - Kenya National Bureau of Statistics (KNBS)
 - County governments for locality and area data
+- All our [contributors](CONTRIBUTORS.md) who help make this project better
+
+## Support the Project
+
+If you find this project useful:
+
+- **Star the repository** on GitHub
+- **Share it** with others who might find it useful
+- **Report bugs** or **request features**
+- **Contribute** code or data
+- **Sponsor** the project (see [Funding](https://github.com/sponsors/davidamunga))
+
+---
+
+**Made with ❤️ in Kenya 🇰🇪**
+
+For questions or support, visit [davidamunga.com](https://davidamunga.com) or open an issue on
+GitHub.
