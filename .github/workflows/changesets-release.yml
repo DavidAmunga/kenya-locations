@@ -41,14 +41,14 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
+      - name: Build package
+        run: pnpm build
+
       - name: Validate data
         run: pnpm validate
 
       - name: Run tests
         run: pnpm test
-
-      - name: Build package
-        run: pnpm build
 
       - name: Create Release PR or Publish
         id: changesets
