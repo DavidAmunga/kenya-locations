@@ -44,7 +44,7 @@ async function loadData() {
     return { counties, constituencies, wards, subCounties, localities, areas };
   } catch (error) {
     log(
-      '❌ Error loading data. Make sure to run "npm run build" first.',
+      '❌ Error loading data. Make sure to run "pnpm run build" first.',
       "red"
     );
     log(`Error: ${error.message}`, "red");

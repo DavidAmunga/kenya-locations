@@ -94,9 +94,9 @@ Before submitting your changes:
 - [ ] All codes are unique within their category
 - [ ] Used official government names
 - [ ] Followed proper formatting (double quotes, 2-space indentation)
-- [ ] Ran `npm run build` successfully
-- [ ] Ran `npm test` successfully
-- [ ] Ran `npm run validate` successfully
+- [ ] Ran `pnpm run build` successfully
+- [ ] Ran `pnpm test` successfully
+- [ ] Ran `pnpm run validate` successfully
 - [ ] Tested search functionality with new data
 
 ## Common Mistakes to Avoid

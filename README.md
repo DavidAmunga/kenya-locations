@@ -315,10 +315,10 @@ git clone https://github.com/DavidAmunga/kenya-locations.git
 cd kenya-locations
 
 # Install dependencies
-npm install
+pnpm install
 
 # Build the library
-npm run build
+pnpm run build
 
 # Open examples/basic-usage.html in your browser
 ```

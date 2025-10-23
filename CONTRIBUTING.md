@@ -274,13 +274,13 @@ Before submitting your changes, ensure:
 ### 1. Build the Project
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### 2. Run Tests
 
 ```bash
-npm test
+pnpm  test
 ```
 
 ### 3. Validate Data Integrity
@@ -288,7 +288,7 @@ npm test
 We provide a validation script to check your data:
 
 ```bash
-npm run validate
+pnpm run validate
 ```
 
 This script will:

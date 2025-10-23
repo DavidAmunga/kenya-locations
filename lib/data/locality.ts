@@ -276,6 +276,7 @@ export const localities: Locality[] = [
   { name: "Musanda", county: "Kakamega" },
   { name: "Nzoia", county: "Kakamega" },
   { name: "Sango", county: "Kakamega" },
+  { name: "Seregeya", county: "Kakamega" },
   { name: "Sheywe", county: "Kakamega" },
   { name: "Shinoyi-Shikomari-Esumeyia", county: "Kakamega" },
   { name: "Shirere", county: "Kakamega" },

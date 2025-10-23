@@ -193,7 +193,7 @@ can introduce issues.
 
 1. The data validation only runs when data files are changed
 2. Lint-staged only processes staged files, not the entire codebase
-3. If still slow, consider running `npm run build` separately
+3. If still slow, consider running `pnpm run build` separately
 
 ### False Positives
 
