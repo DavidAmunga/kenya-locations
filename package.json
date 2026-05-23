@@ -47,6 +47,11 @@
       "import": "./dist/search.js",
       "require": "./dist/search.cjs"
     },
+    "./version": {
+      "types": "./dist/version.d.ts",
+      "import": "./dist/version.js",
+      "require": "./dist/version.cjs"
+    },
     "./package.json": "./package.json"
   },
   "author": "David Amunga <https://davidamunga.com>",

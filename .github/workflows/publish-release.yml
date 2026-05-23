@@ -75,6 +75,7 @@ jobs:
         id: publish
         run: |
           pnpm changeset:publish
+          git push --follow-tags
           echo "published=true" >> $GITHUB_OUTPUT
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -87,7 +88,7 @@ jobs:
           TAG="v$VERSION"
 
           # Extract changelog for this version
-          CHANGELOG_CONTENT=$(sed -n "/## $VERSION/,/## /p" CHANGELOG.md | sed '$ d' | tail -n +2)
+          CHANGELOG_CONTENT=$(awk -v ver="$VERSION" '/^## /{if(found) exit; if(index($0,ver)) found=1; next} found{print}' CHANGELOG.md)
 
           if [ -z "$CHANGELOG_CONTENT" ]; then
             CHANGELOG_CONTENT="Release v$VERSION - See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."

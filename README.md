@@ -63,6 +63,7 @@ import { getCounties, getLocalities, search } from "kenya-locations";
 | `kenya-locations/wards`          | Ward-level data                       |
 | `kenya-locations/sub-counties`   | Sub-county information                |
 | `kenya-locations/search`         | Search functionality                  |
+| `kenya-locations/version`        | Package version string                |
 
 **Full package:** 2.56 kB (gzipped)
 
@@ -515,8 +516,8 @@ interface SearchOptions {
 
 ### Version
 
-- `DATA_VERSION: string` - The current dataset version string. Useful for verifying that consumers
-  are running against the expected data release.
+- `DATA_VERSION: string` - The current package version string, automatically derived from
+  `package.json`. Always in sync with the published npm version — no manual maintenance required.
 
 ```typescript
 import { DATA_VERSION } from "kenya-locations";

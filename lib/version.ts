@@ -1,11 +1,14 @@
+import pkg from "../package.json";
+
 /**
- * The current data version of the kenya-locations dataset.
- * Consumers can use this to verify they are using the expected data version.
+ * The current version of the kenya-locations package and dataset.
+ * Derived directly from package.json so it is always in sync with the
+ * published version — no manual maintenance required.
  *
  * @example
  * ```ts
  * import { DATA_VERSION } from 'kenya-locations';
- * console.log(DATA_VERSION); // "0.3.0"
+ * console.log(DATA_VERSION); // e.g. "0.4.0"
  * ```
  */
-export const DATA_VERSION = "0.3.0";
+export const DATA_VERSION: string = pkg.version;
