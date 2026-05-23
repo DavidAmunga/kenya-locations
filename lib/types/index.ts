@@ -70,7 +70,8 @@ export type SearchType =
   | "area";
 
 /**
- * Data version options
+ * @deprecated This interface is unused. Use {@link DATA_VERSION} to read the
+ * current data version at runtime.
  */
 export interface KenyaDivisionsOptions {
   dataVersion?: string;

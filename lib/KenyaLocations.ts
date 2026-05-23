@@ -62,10 +62,14 @@ const localityToAreasMap = buildGroupMap(areas, (a) => a.locality);
 const countyToAreasMap = buildGroupMap(areas, (a) => a.county);
 
 // Sub-county maps
+const subCountyCodeMap = buildLookupMap(subCounties, (sc) => sc.code);
 const subCountyNameMap = buildLookupMap(subCounties, (sc) =>
   sc.name.toLowerCase()
 );
-const countyToSubCountiesMap = buildGroupMap(subCounties, (sc) => sc.county);
+const countyToSubCountiesMap = buildGroupMap(
+  subCounties,
+  (sc) => countyNameMap.get(sc.county.toLowerCase())?.code
+);
 
 // --- Wrapper Classes ---
 
@@ -354,11 +358,26 @@ export function getCountyByCode(code: string): County | undefined {
 }
 
 /**
- * Get a locality by its name
+ * Get a locality by its name.
+ * When the same name exists in multiple counties, returns the first match.
+ * Use {@link getLocalitiesByName} to retrieve all matches, or pass a county
+ * via the {@link locality} function to narrow the result.
  */
 export function getLocalityByName(name: string): LocalityWrapper | undefined {
   const found = localityNameMap.get(name.toLowerCase());
   return found ? new LocalityWrapper(found) : undefined;
+}
+
+/**
+ * Get all localities matching a name across all counties.
+ * Useful when the same locality name exists in more than one county.
+ * @param name Locality name (case-insensitive)
+ * @returns Array of LocalityWrapper instances
+ */
+export function getLocalitiesByName(name: string): LocalityWrapper[] {
+  return localities
+    .filter((l) => l.name.toLowerCase() === name.toLowerCase())
+    .map((l) => new LocalityWrapper(l));
 }
 
 /**
@@ -431,14 +450,23 @@ export function getSubCountiesInCounty(nameOrCode: string): SubCounty[] {
     countyCodeMap.get(nameOrCode) ??
     countyNameMap.get(nameOrCode.toLowerCase());
   if (!county) return [];
-  return countyToSubCountiesMap.get(county.name) ?? [];
+  return countyToSubCountiesMap.get(county.code) ?? [];
 }
 
 /**
- * Get all wards in a sub-county
+ * Get all wards in a sub-county by name or code.
+ * Sub-county names correspond to constituency names in the ward dataset,
+ * so this matches wards whose constituency field equals the sub-county name.
+ * @param nameOrCode Sub-county name or code
  */
-export function getWardsInSubCounty(subCountyCode: string): Ward[] {
-  return wards.filter((w) => w.constituency === subCountyCode);
+export function getWardsInSubCounty(nameOrCode: string): Ward[] {
+  const sc =
+    subCountyCodeMap.get(nameOrCode) ??
+    subCountyNameMap.get(nameOrCode.toLowerCase());
+  if (!sc) return [];
+  return wards.filter(
+    (w) => w.constituency.toLowerCase() === sc.name.toLowerCase()
+  );
 }
 
 /**
@@ -598,6 +626,7 @@ export class KenyaLocations {
   public static getAreas = getAreas;
   public static getCountyByCode = getCountyByCode;
   public static getLocalityByName = getLocalityByName;
+  public static getLocalitiesByName = getLocalitiesByName;
   public static getAreaByName = getAreaByName;
   public static getLocalitiesInCounty = getLocalitiesInCounty;
   public static getAreasInLocality = getAreasInLocality;

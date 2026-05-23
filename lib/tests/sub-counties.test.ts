@@ -5,6 +5,7 @@ import {
   getSubCountyByName,
   getSubCountiesInCounty,
   getCountyOfSubCounty,
+  getWardsInSubCounty,
 } from "../sub-counties";
 
 describe("Sub-Counties Module", () => {
@@ -63,6 +64,30 @@ describe("Sub-Counties Module", () => {
 
     it("returns undefined for unknown sub-county", () => {
       expect(getCountyOfSubCounty("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getWardsInSubCounty", () => {
+    it("returns wards for a sub-county by code", () => {
+      const ainabkoi = getSubCountyByName("Ainabkoi")!;
+      const result = getWardsInSubCounty(ainabkoi.code);
+      expect(result.length).toBeGreaterThan(0);
+      result.forEach((w) =>
+        expect(w.constituency.toLowerCase()).toBe(ainabkoi.name.toLowerCase())
+      );
+    });
+
+    it("returns wards for a sub-county by name", () => {
+      const result = getWardsInSubCounty("Ainabkoi");
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it("is case-insensitive for name lookup", () => {
+      expect(getWardsInSubCounty("ainabkoi").length).toBeGreaterThan(0);
+    });
+
+    it("returns empty array for unknown sub-county", () => {
+      expect(getWardsInSubCounty("Nowhere")).toEqual([]);
     });
   });
 });

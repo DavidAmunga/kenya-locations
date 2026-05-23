@@ -100,17 +100,26 @@ export function getCountyOfSubCounty(
 }
 
 /**
- * Get all wards in a sub-county
- * @param subCountyCode Sub-county code
+ * Get all wards in a sub-county by name or code.
+ * Sub-county names correspond to constituency names in the ward dataset,
+ * so this matches wards whose constituency field equals the sub-county name.
+ * @param nameOrCode Sub-county name or code
  * @returns Array of wards in the sub-county
  * @example
  * ```ts
  * import { getWardsInSubCounty } from 'kenya-locations/sub-counties';
- * const wards = getWardsInSubCounty('001');
+ * const wards = getWardsInSubCounty('154');       // by code
+ * const wards2 = getWardsInSubCounty('Ainabkoi'); // by name
  * ```
  */
-export function getWardsInSubCounty(subCountyCode: string): Ward[] {
-  return wards.filter((w) => w.constituency === subCountyCode);
+export function getWardsInSubCounty(nameOrCode: string): Ward[] {
+  const sc =
+    subCountyCodeMap.get(nameOrCode) ??
+    subCountyNameMap.get(nameOrCode.toLowerCase());
+  if (!sc) return [];
+  return wards.filter(
+    (w) => w.constituency.toLowerCase() === sc.name.toLowerCase()
+  );
 }
 
 // Export types

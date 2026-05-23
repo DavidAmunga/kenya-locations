@@ -1,3 +1,4 @@
+import { DATA_VERSION } from "../version";
 import {
   getCounties,
   county,
@@ -5,6 +6,7 @@ import {
   getConstituencyByCode,
   getWards,
   getWardsInCounty,
+  getWardsInSubCounty,
   getCountyOfWard,
   search,
   getSubCounties,
@@ -13,6 +15,7 @@ import {
   getLocalities,
   getAreas,
   getLocalityByName,
+  getLocalitiesByName,
   getAreaByName,
   getLocalitiesInCounty,
   getAreasInLocality,
@@ -23,6 +26,13 @@ import {
   locality,
 } from "../KenyaLocations";
 import { expect, it, describe } from "vitest";
+
+describe("DATA_VERSION", () => {
+  it("exports a non-empty version string", () => {
+    expect(typeof DATA_VERSION).toBe("string");
+    expect(DATA_VERSION.length).toBeGreaterThan(0);
+  });
+});
 
 describe("KenyaLocations - Main API", () => {
   describe("getCounties", () => {
@@ -133,6 +143,24 @@ describe("KenyaLocations - Main API", () => {
     });
   });
 
+  describe("getWardsInSubCounty", () => {
+    it("should return wards for a sub-county by code", () => {
+      const result = getWardsInSubCounty("154"); // Ainabkoi
+      expect(result.length).toBeGreaterThan(0);
+      result.forEach((w) =>
+        expect(w.constituency.toLowerCase()).toBe("ainabkoi")
+      );
+    });
+
+    it("should return wards for a sub-county by name", () => {
+      expect(getWardsInSubCounty("Ainabkoi").length).toBeGreaterThan(0);
+    });
+
+    it("should return empty array for unknown sub-county", () => {
+      expect(getWardsInSubCounty("NonExistent")).toEqual([]);
+    });
+  });
+
   describe("getLocalities", () => {
     it("should return all localities", () => {
       const result = getLocalities();
@@ -149,6 +177,22 @@ describe("KenyaLocations - Main API", () => {
       expect(result[0]).toHaveProperty("name");
       expect(result[0]).toHaveProperty("locality");
       expect(result[0]).toHaveProperty("county");
+    });
+  });
+
+  describe("getLocalitiesByName", () => {
+    it("should return all localities matching a name", () => {
+      const results = getLocalitiesByName("Westlands");
+      expect(results.length).toBeGreaterThan(0);
+      results.forEach((l) => expect(l.name.toLowerCase()).toBe("westlands"));
+    });
+
+    it("should return empty array for unknown locality name", () => {
+      expect(getLocalitiesByName("NonExistentLocality")).toEqual([]);
+    });
+
+    it("should be case-insensitive", () => {
+      expect(getLocalitiesByName("westlands").length).toBeGreaterThan(0);
     });
   });
 

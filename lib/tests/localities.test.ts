@@ -2,6 +2,7 @@ import { expect, it, describe } from "vitest";
 import {
   getLocalities,
   getLocalityByName,
+  getLocalitiesByName,
   getLocalitiesInCounty,
   getCountyOfLocality,
   locality,
@@ -33,6 +34,22 @@ describe("Localities Module", () => {
 
     it("returns undefined for unknown locality", () => {
       expect(getLocalityByName("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getLocalitiesByName", () => {
+    it("returns all localities matching a name", () => {
+      const results = getLocalitiesByName("Westlands");
+      expect(results.length).toBeGreaterThan(0);
+      results.forEach((l) => expect(l.name.toLowerCase()).toBe("westlands"));
+    });
+
+    it("is case-insensitive", () => {
+      expect(getLocalitiesByName("westlands").length).toBeGreaterThan(0);
+    });
+
+    it("returns empty array for unknown locality name", () => {
+      expect(getLocalitiesByName("Nowhere")).toEqual([]);
     });
   });
 

@@ -42,12 +42,12 @@ function getStagedFiles() {
 
 function hasDataFiles(stagedFiles) {
   const dataFilePatterns = [
-    "lib/data/counties.ts",
-    "lib/data/sub-counties.ts",
-    "lib/data/constituencies.ts",
-    "lib/data/wards.ts",
-    "lib/data/locality.ts",
-    "lib/data/area.ts",
+    "lib/data/counties.json",
+    "lib/data/sub-counties.json",
+    "lib/data/constituencies.json",
+    "lib/data/wards.json",
+    "lib/data/locality.json",
+    "lib/data/area.json",
   ];
 
   return stagedFiles.some((file) =>
@@ -58,12 +58,7 @@ function hasDataFiles(stagedFiles) {
 async function runFullValidation() {
   try {
     log("🔍 Running full data validation...", "blue");
-
-    // Import and run the full validation
-    const { default: validate } = await import("./validate-data.js");
-
-    // The validate-data.js script will exit with code 1 if validation fails
-    // and code 0 if it passes, so we don't need to handle the return value
+    await import("./validate-data.js");
   } catch (error) {
     log("❌ Validation failed!", "red");
     log(`Error: ${error.message}`, "red");
