@@ -74,7 +74,6 @@ jobs:
       - name: Publish to npm
         id: publish
         run: |
-          npm config delete //registry.npmjs.org/:_authToken
           pnpm changeset:publish
           echo "published=true" >> $GITHUB_OUTPUT
         env:
