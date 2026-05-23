@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- [#15](https://github.com/davidamunga/kenya-locations/pull/15)
+  [`196a243`](https://github.com/davidamunga/kenya-locations/commit/196a243b7cba6200e2ac88f6d6e9fcda238b8f94)
+  Thanks [@davidamunga](https://github.com/davidamunga)! - Refactor internal map construction to use
+  shared declarative utilities, unify the error hierarchy, and export the full error class tree from
+  the main package entry point.
+
+  **New exports** — all error classes are now importable from `"kenya-locations"`:
+
+  ```ts
+  import {
+    LocationError,
+    LocationNotFoundError,
+    InvalidLocationCodeError,
+    SearchError,
+    DataValidationError,
+    ConfigurationError,
+  } from "kenya-locations";
+  ```
+
+  **Internal improvements (no API changes):**
+
+  - `buildLookupMap` / `buildGroupMap` utilities replace all imperative `forEach` + `push`
+    map-building blocks across every module
+  - `KenyaLocations.ts` now imports errors from `errors/LocationErrors.ts`; `NotFoundError` and
+    `KenyaLocationsError` remain exported as backward-compatible aliases
+  - Removed duplicate `Area` / `Locality` interface definitions from data files — `types/index.ts`
+    is the single source of truth for all entity shapes
+  - Removed duplicate `SearchType` definition from `utils/search.ts`
+  - `Fuse<any>` replaced with proper generic types in the search utility
+  - Deleted unused `data-structures/Trie.ts`
+  - Test suite split into per-module files for faster, clearer failures
+
+### Patch Changes
+
+- [`2cfaa94`](https://github.com/davidamunga/kenya-locations/commit/2cfaa943d0649386b36f24b71e9c5ca4cca76cc5)
+  Thanks [@davidamunga](https://github.com/davidamunga)! - chore: improve release workflow
+
 ## 0.2.0
 
 ### Minor Changes
