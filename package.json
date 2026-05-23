@@ -6,6 +6,49 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./counties": {
+      "types": "./dist/counties.d.ts",
+      "import": "./dist/counties.js",
+      "require": "./dist/counties.cjs"
+    },
+    "./localities": {
+      "types": "./dist/localities.d.ts",
+      "import": "./dist/localities.js",
+      "require": "./dist/localities.cjs"
+    },
+    "./areas": {
+      "types": "./dist/areas.d.ts",
+      "import": "./dist/areas.js",
+      "require": "./dist/areas.cjs"
+    },
+    "./constituencies": {
+      "types": "./dist/constituencies.d.ts",
+      "import": "./dist/constituencies.js",
+      "require": "./dist/constituencies.cjs"
+    },
+    "./wards": {
+      "types": "./dist/wards.d.ts",
+      "import": "./dist/wards.js",
+      "require": "./dist/wards.cjs"
+    },
+    "./sub-counties": {
+      "types": "./dist/sub-counties.d.ts",
+      "import": "./dist/sub-counties.js",
+      "require": "./dist/sub-counties.cjs"
+    },
+    "./search": {
+      "types": "./dist/search.d.ts",
+      "import": "./dist/search.js",
+      "require": "./dist/search.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "author": "David Amunga <https://davidamunga.com>",
   "license": "MIT",
   "repository": {
