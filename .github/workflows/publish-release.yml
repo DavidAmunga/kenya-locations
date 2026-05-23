@@ -33,6 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -73,6 +74,7 @@ jobs:
       - name: Publish to npm
         id: publish
         run: |
+          npm config delete //registry.npmjs.org/:_authToken
           pnpm changeset:publish
           echo "published=true" >> $GITHUB_OUTPUT
         env:
