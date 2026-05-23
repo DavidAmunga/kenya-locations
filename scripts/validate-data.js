@@ -3,17 +3,17 @@
 /**
  * Data Validation Script for Kenya Locations
  *
- * This script validates the data integrity across all data files
+ * Reads JSON source files directly — no prior build required.
  * Run with: node scripts/validate-data.js
  */
 
+import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Colors for console output
 const colors = {
   red: "\x1b[31m",
   green: "\x1b[32m",
@@ -27,29 +27,24 @@ function log(message, color = "reset") {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
-async function loadData() {
+function readJson(filename) {
   try {
-    // Import the built module
-    const modulePath = join(__dirname, "../dist/index.js");
-    const module = await import(modulePath);
-
-    // Extract data using the exported functions
-    const counties = module.getCounties();
-    const constituencies = module.getConstituencies();
-    const wards = module.getWards();
-    const subCounties = module.getSubCounties();
-    const localities = module.getLocalities();
-    const areas = module.getAreas();
-
-    return { counties, constituencies, wards, subCounties, localities, areas };
+    const fullPath = join(__dirname, "../lib/data", filename);
+    return JSON.parse(readFileSync(fullPath, "utf-8"));
   } catch (error) {
-    log(
-      '❌ Error loading data. Make sure to run "pnpm run build" first.',
-      "red"
-    );
-    log(`Error: ${error.message}`, "red");
+    log(`❌ Failed to read ${filename}: ${error.message}`, "red");
     process.exit(1);
   }
+}
+
+function loadData() {
+  const counties = readJson("counties.json");
+  const constituencies = readJson("constituencies.json");
+  const wards = readJson("wards.json");
+  const subCounties = readJson("sub-counties.json");
+  const localities = readJson("locality.json");
+  const areas = readJson("area.json");
+  return { counties, constituencies, wards, subCounties, localities, areas };
 }
 
 function validateUniqueIds(data, type, idField = "code") {
@@ -115,15 +110,12 @@ function validateConstituencyReferences(constituencies, counties) {
         index,
         issue: "Invalid county reference - should be a string",
       });
-    } else {
-      // Check if the referenced county exists
-      if (!countyNames.has(countyRef)) {
-        invalidRefs.push({
-          constituency: constituency.name,
-          index,
-          issue: `County "${countyRef}" not found`,
-        });
-      }
+    } else if (!countyNames.has(countyRef)) {
+      invalidRefs.push({
+        constituency: constituency.name,
+        index,
+        issue: `County "${countyRef}" not found`,
+      });
     }
   });
 
@@ -145,11 +137,7 @@ function validateLocalityAreaReferences(areas, localities) {
 
   areas.forEach((area, index) => {
     if (!localityNames.has(area.locality)) {
-      invalidRefs.push({
-        area: area.name,
-        locality: area.locality,
-        index,
-      });
+      invalidRefs.push({ area: area.name, locality: area.locality, index });
     }
   });
 
@@ -169,19 +157,19 @@ function validateLocalityAreaReferences(areas, localities) {
 }
 
 function validateLocalityUniqueness(localities) {
-  const countyGroups = {};
+  const seen = {};
   const duplicates = [];
 
   localities.forEach((locality, index) => {
     const key = `${locality.county}:${locality.name}`;
-    if (countyGroups[key]) {
+    if (seen[key]) {
       duplicates.push({
         name: locality.name,
         county: locality.county,
-        indices: [countyGroups[key].index, index],
+        indices: [seen[key].index, index],
       });
     } else {
-      countyGroups[key] = { index, locality };
+      seen[key] = { index, locality };
     }
   });
 
@@ -201,19 +189,19 @@ function validateLocalityUniqueness(localities) {
 }
 
 function validateAreaUniqueness(areas) {
-  const localityGroups = {};
+  const seen = {};
   const duplicates = [];
 
   areas.forEach((area, index) => {
     const key = `${area.locality}:${area.name}`;
-    if (localityGroups[key]) {
+    if (seen[key]) {
       duplicates.push({
         name: area.name,
         locality: area.locality,
-        indices: [localityGroups[key].index, index],
+        indices: [seen[key].index, index],
       });
     } else {
-      localityGroups[key] = { index, area };
+      seen[key] = { index, area };
     }
   });
 
@@ -232,12 +220,71 @@ function validateAreaUniqueness(areas) {
   }
 }
 
-async function validateDataIntegrity() {
+function validateRequiredFields(data, type, fields) {
+  const missing = [];
+
+  data.forEach((item, index) => {
+    fields.forEach((field) => {
+      if (
+        item[field] === undefined ||
+        item[field] === null ||
+        item[field] === ""
+      ) {
+        missing.push({ field, index, item: item.name || item.code || index });
+      }
+    });
+  });
+
+  if (missing.length > 0) {
+    log(`❌ Missing required fields in ${type}:`, "red");
+    missing.forEach(({ field, index, item }) => {
+      log(`   - "${field}" missing on ${item} (index ${index})`, "red");
+    });
+    return false;
+  } else {
+    log(`✅ All ${type} have required fields`, "green");
+    return true;
+  }
+}
+
+function validateDataIntegrity() {
   log("🔍 Starting data validation...", "blue");
   log("", "reset");
 
-  const data = await loadData();
+  const data = loadData();
   let allValid = true;
+
+  // Validate required fields
+  log("📋 Checking required fields...", "yellow");
+  allValid &= validateRequiredFields(data.counties, "counties", [
+    "code",
+    "name",
+  ]);
+  allValid &= validateRequiredFields(data.constituencies, "constituencies", [
+    "code",
+    "name",
+    "county",
+  ]);
+  allValid &= validateRequiredFields(data.wards, "wards", [
+    "code",
+    "name",
+    "constituency",
+  ]);
+  allValid &= validateRequiredFields(data.subCounties, "sub-counties", [
+    "code",
+    "name",
+    "county",
+  ]);
+  allValid &= validateRequiredFields(data.localities, "localities", [
+    "name",
+    "county",
+  ]);
+  allValid &= validateRequiredFields(data.areas, "areas", [
+    "name",
+    "locality",
+    "county",
+  ]);
+  log("", "reset");
 
   // Validate unique IDs
   log("📋 Checking for duplicate IDs...", "yellow");
@@ -317,5 +364,4 @@ async function validateDataIntegrity() {
   }
 }
 
-// Run validation
 validateDataIntegrity();

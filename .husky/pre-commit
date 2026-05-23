@@ -4,6 +4,6 @@
 npx lint-staged
 
 # Run tests to ensure nothing is broken
-npm test
+pnpm test
 
 echo "✅ Pre-commit checks passed! Ready to commit."

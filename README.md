@@ -159,7 +159,11 @@ const nairobiLocalities = getLocalitiesInCounty("Nairobi");
 
 // Get locality with optional county filter
 const westlandsInNairobi = locality("Westlands", "Nairobi");
-const anyWestlands = locality("Westlands"); // First match
+const anyWestlands = locality("Westlands"); // First match (if name is unique across counties)
+
+// Get ALL localities sharing a name (useful when the same name appears in multiple counties)
+import { getLocalitiesByName } from "kenya-locations/localities";
+const allTowns = getLocalitiesByName("Town"); // Returns LocalityWrapper[] for every county
 ```
 
 ### Working with Areas
@@ -246,6 +250,11 @@ const subCountiesInNairobiByCode = getSubCountiesInCounty("047"); // by code
 
 // Get the county a sub-county belongs to
 const subCountyCounty = getCountyOfSubCounty("Westlands");
+
+// Get wards in a sub-county — accepts sub-county name OR code
+import { getWardsInSubCounty } from "kenya-locations/sub-counties";
+const wardsByCode = getWardsInSubCounty("154"); // by sub-county code
+const wardsByName = getWardsInSubCounty("Ainabkoi"); // by sub-county name
 ```
 
 ### Chainable API
@@ -434,7 +443,10 @@ LocationError (base)
 **Import:** `import { ... } from "kenya-locations/localities"`
 
 - `getLocalities(): Locality[]` - Get all localities
-- `getLocalityByName(name: string): LocalityWrapper | undefined` - Get locality by name
+- `getLocalityByName(name: string): LocalityWrapper | undefined` - Get locality by name (returns
+  first match when a name appears in multiple counties)
+- `getLocalitiesByName(name: string): LocalityWrapper[]` - Get **all** localities matching a name
+  across all counties
 - `getLocalitiesInCounty(countyName: string): Locality[]` - Get localities in a county
 - `getCountyOfLocality(localityName: string): County | undefined` - Get county of locality
 - `locality(name: string, countyName?: string): LocalityWrapper | undefined` - Get locality with
@@ -481,7 +493,7 @@ LocationError (base)
 - `getSubCountyByName(name: string): SubCounty | undefined` - Get sub-county by name
 - `getSubCountiesInCounty(countyNameOrCode: string): SubCounty[]` - Get sub-counties in county
 - `getCountyOfSubCounty(subCountyName: string): County | undefined` - Get county of sub-county
-- `getWardsInSubCounty(subCountyCode: string): Ward[]` - Get wards in sub-county
+- `getWardsInSubCounty(nameOrCode: string): Ward[]` - Get wards in sub-county by name or code
 
 ### Search Module
 
@@ -501,19 +513,35 @@ interface SearchOptions {
 }
 ```
 
+### Version
+
+- `DATA_VERSION: string` - The current dataset version string. Useful for verifying that consumers
+  are running against the expected data release.
+
+```typescript
+import { DATA_VERSION } from "kenya-locations";
+console.log(DATA_VERSION); // e.g. "0.4.0"
+```
+
 ### Wrapper Classes
 
 #### CountyWrapper
 
-Provides chainable methods for navigating from a county:
+Provides chainable methods for navigating from a county.
+
+> **Note:** When importing from the main `kenya-locations` package, `constituencies()` returns
+> `ConstituencyWrapper[]` and `constituency()` returns a `ConstituencyWrapper`. When importing from
+> `kenya-locations/counties`, these methods return plain `Constituency` / `Constituency[]` objects.
 
 - `code: string` - Get the county code
 - `name: string` - Get the county name
 - `data: County` - Get all data for the county
-- `constituencies(): ConstituencyWrapper[]` - Get all constituencies in this county
-- `constituency(nameOrCode: string): ConstituencyWrapper` - Get a constituency by name or code
-- `localities(): LocalityWrapper[]` - Get all localities in this county
-- `locality(name: string): LocalityWrapper` - Get a locality by name
+- `constituencies(): ConstituencyWrapper[] | Constituency[]` - Get all constituencies in this county
+- `constituency(nameOrCode: string): ConstituencyWrapper | Constituency` - Get a constituency by
+  name or code (throws `LocationNotFoundError` if not found)
+- `localities(): LocalityWrapper[] | Locality[]` - Get all localities in this county
+- `locality(name: string): LocalityWrapper | Locality` - Get a locality by name (throws
+  `LocationNotFoundError` if not found)
 - `areas(): Area[]` - Get all areas in this county
 - `areasByLocality(localityName: string): Area[]` - Get areas in a specific locality
 - `wards(): Ward[]` - Get all wards in this county
@@ -707,11 +735,15 @@ Contributions are welcome! We especially welcome contributions to expand our loc
 - Testing procedures
 - Submission guidelines
 
+**Data files are JSON.** All location data lives in `lib/data/*.json`. You do not need to know
+TypeScript to add or update entries — open the relevant JSON file, add your record, and the
+pre-commit hook will validate it automatically.
+
 **Pre-commit Hooks:** This project uses automated pre-commit hooks to ensure code quality and data
 integrity. When you commit changes, the following happen automatically:
 
 - Code formatting and linting
-- Data validation (when data files are changed)
+- Data validation (when `lib/data/*.json` files are changed) — runs without a build step
 - Test execution
 - Commit message format validation
 

@@ -24,6 +24,7 @@ export {
   getLocalities,
   getAreas,
   getLocalityByName,
+  getLocalitiesByName,
   getAreaByName,
   getLocalitiesInCounty,
   getAreasInLocality,
@@ -33,6 +34,8 @@ export {
   getLocalityOfArea,
   locality,
 } from "./KenyaLocations";
+
+export { DATA_VERSION } from "./version";
 
 export type {
   County,

@@ -20,7 +20,7 @@ export default defineConfig({
         `${entryName}.${format === "cjs" ? "cjs" : "js"}`,
     },
     rollupOptions: {
-      external: [],
+      external: ["fuse.js"],
       output: {
         preserveModules: false,
         exports: "named",

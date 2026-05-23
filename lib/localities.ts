@@ -139,6 +139,23 @@ export function getCountyOfLocality(localityName: string): County | undefined {
  * const westlands = locality('Westlands', 'Nairobi');
  * ```
  */
+/**
+ * Get all localities matching a name across all counties.
+ * Useful when the same locality name exists in more than one county.
+ * @param name Locality name (case-insensitive)
+ * @returns Array of LocalityWrapper instances
+ * @example
+ * ```ts
+ * import { getLocalitiesByName } from 'kenya-locations/localities';
+ * const allTown = getLocalitiesByName('Town');
+ * ```
+ */
+export function getLocalitiesByName(name: string): LocalityWrapper[] {
+  return localities
+    .filter((l) => l.name.toLowerCase() === name.toLowerCase())
+    .map((l) => new LocalityWrapper(l));
+}
+
 export function locality(
   name: string,
   countyName?: string
