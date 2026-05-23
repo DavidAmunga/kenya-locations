@@ -1,20 +1,18 @@
 import Fuse from "fuse.js";
-import type { SearchResult } from "../types";
+import type {
+  SearchResult,
+  SearchType,
+  County,
+  Constituency,
+  Ward,
+  SubCounty,
+  Locality,
+  Area,
+} from "../types";
 import { counties, constituencies, wards } from "../data";
 import { subCounties } from "../data/sub-counties";
 import { areas } from "../data/area";
 import { localities } from "../data/locality";
-
-/**
- * Available search types
- */
-export type SearchType =
-  | "county"
-  | "constituency"
-  | "ward"
-  | "sub-county"
-  | "locality"
-  | "area";
 
 /**
  * Configuration for Fuse.js fuzzy search - optimized for name-only search
@@ -32,24 +30,23 @@ const searchOptions = {
 /**
  * Lazy-initialized Fuse instances for better performance
  */
-let countyFuse: Fuse<any> | null = null;
-let constituencyFuse: Fuse<any> | null = null;
-let wardFuse: Fuse<any> | null = null;
-let subCountyFuse: Fuse<any> | null = null;
-let localityFuse: Fuse<any> | null = null;
-let areaFuse: Fuse<any> | null = null;
+let countyFuse: Fuse<County> | null = null;
+let constituencyFuse: Fuse<Constituency> | null = null;
+let wardFuse: Fuse<Ward> | null = null;
+let subCountyFuse: Fuse<SubCounty> | null = null;
+let localityFuse: Fuse<Locality> | null = null;
+let areaFuse: Fuse<Area> | null = null;
 
 /**
  * Initialize Fuse instances only when needed
  */
 function initializeFuseInstances() {
-  if (!countyFuse) countyFuse = new Fuse(counties, searchOptions);
-  if (!constituencyFuse)
-    constituencyFuse = new Fuse(constituencies, searchOptions);
-  if (!wardFuse) wardFuse = new Fuse(wards, searchOptions);
-  if (!subCountyFuse) subCountyFuse = new Fuse(subCounties, searchOptions);
-  if (!localityFuse) localityFuse = new Fuse(localities, searchOptions);
-  if (!areaFuse) areaFuse = new Fuse(areas, searchOptions);
+  countyFuse ??= new Fuse(counties, searchOptions);
+  constituencyFuse ??= new Fuse(constituencies, searchOptions);
+  wardFuse ??= new Fuse(wards, searchOptions);
+  subCountyFuse ??= new Fuse(subCounties, searchOptions);
+  localityFuse ??= new Fuse(localities, searchOptions);
+  areaFuse ??= new Fuse(areas, searchOptions);
 }
 
 /**

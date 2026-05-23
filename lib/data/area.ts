@@ -1,8 +1,4 @@
-export interface Area {
-  name: string;
-  locality: string;
-  county: string;
-}
+import type { Area } from "../types";
 
 export const areas: Area[] = [
   { name: "Bokoli Market", locality: "Bokoli", county: "Bungoma" },

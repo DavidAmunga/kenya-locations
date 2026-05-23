@@ -1,7 +1,4 @@
-export interface Locality {
-  name: string;
-  county: string;
-}
+import type { Locality } from "../types";
 
 export const localities: Locality[] = [
   { name: "Bartabwa", county: "Baringo" },
