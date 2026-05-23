@@ -74,7 +74,7 @@ jobs:
       - name: Publish to npm
         id: publish
         run: |
-          changeset publish
+          pnpm changeset:publish
           echo "published=true" >> $GITHUB_OUTPUT
         env:
           NPM_CONFIG_PROVENANCE: "true"

@@ -87,7 +87,7 @@
     "prepare-release": "bash scripts/prepare-release.sh",
     "changeset": "changeset",
     "changeset:version": "changeset version",
-    "changeset:publish": "pnpm build && changeset publish"
+    "changeset:publish": "changeset publish"
   },
   "dependencies": {
     "fuse.js": "^7.1.0"
