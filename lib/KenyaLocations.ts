@@ -604,7 +604,12 @@ export function getCountyOfConstituency(
 }
 
 /**
- * Main class for working with Kenya's administrative locations
+ * Main class for working with Kenya's administrative locations.
+ *
+ * @deprecated Use the tree-shakeable standalone functions instead.
+ * Import directly from `kenya-locations` or its subpath exports
+ * (e.g. `kenya-locations/counties`, `kenya-locations/wards`).
+ * The class will be removed in a future major version.
  */
 export class KenyaLocations {
   private static instance: KenyaLocations;

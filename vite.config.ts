@@ -14,6 +14,7 @@ export default defineConfig({
         wards: resolve(__dirname, "lib/wards.ts"),
         "sub-counties": resolve(__dirname, "lib/sub-counties.ts"),
         search: resolve(__dirname, "lib/search.ts"),
+        version: resolve(__dirname, "lib/version.ts"),
       },
       formats: ["es", "cjs"],
       fileName: (format, entryName) =>
