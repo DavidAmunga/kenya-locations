@@ -75,7 +75,7 @@ jobs:
         id: publish
         run: |
           pnpm changeset:publish
-          git push --follow-tags
+          git push origin --follow-tags
           echo "published=true" >> $GITHUB_OUTPUT
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
