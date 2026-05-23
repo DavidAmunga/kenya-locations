@@ -43,9 +43,12 @@ yarn add kenya-locations
 ### Basic Example
 
 ```typescript
+// Tree-shakeable imports (recommended — only loads what you need)
 import { getCounties, county } from "kenya-locations/counties";
 import { getLocalities } from "kenya-locations/localities";
 import { search } from "kenya-locations/search";
+
+// Or import everything from the main package
 import { getCounties, getLocalities, search } from "kenya-locations";
 ```
 
@@ -309,7 +312,7 @@ const results = search("Westlands");
 Results include:
 [
   { type: 'locality', item: { name: 'Westlands', county: 'Nairobi' } },
-  { type: 'constituency', item: { code: '290', name: 'Westlands', county: 'Mombasa' } },
+  { type: 'constituency', item: { code: '290', name: 'Westlands', county: 'Nairobi' } },
   { type: 'area', item: { name: 'Gigiri', locality: 'Westlands', county: 'Nairobi' } },
   // ... more results
 ]
@@ -369,8 +372,11 @@ console.log(localityCounty?.name); // "Nairobi"
 
 ### Error Handling
 
+Wrapper methods that navigate to a child entity (`.locality()`, `.area()`, `.ward()`,
+`.constituency()`) throw `LocationNotFoundError` when no match is found.
+
 ```typescript
-import { county, getLocalityByName, LocationNotFoundError } from "kenya-locations";
+import { county, getLocalityByName, LocationNotFoundError, LocationError } from "kenya-locations";
 
 try {
   const nairobi = county("Nairobi");
@@ -389,6 +395,27 @@ try {
     console.log("Area not found:", error.message);
   }
 }
+
+// LocationError is the base class — catch any location-related error
+try {
+  const westlands = county("Westlands"); // constituency, not a county
+  westlands?.ward("Mountain View");
+} catch (error) {
+  if (error instanceof LocationError) {
+    console.log("Location error:", error.message);
+  }
+}
+```
+
+**Error hierarchy:**
+
+```
+LocationError (base)
+├── LocationNotFoundError  — entity not found by name/code
+├── InvalidLocationCodeError — malformed code format
+├── SearchError            — search operation failure
+├── DataValidationError    — data integrity issue
+└── ConfigurationError     — invalid configuration
 ```
 
 ## API Reference
@@ -687,9 +714,6 @@ integrity. When you commit changes, the following happen automatically:
 - Data validation (when data files are changed)
 - Test execution
 - Commit message format validation
-
-**Learn More:** See [Pre-commit Hooks Documentation](docs/PRE_COMMIT_HOOKS.md) for detailed
-information.
 
 Please feel free to submit a Pull Request following our guidelines.
 

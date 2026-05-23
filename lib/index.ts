@@ -46,3 +46,12 @@ export type {
 } from "./types";
 
 export { counties, constituencies, wards } from "./data";
+
+export {
+  LocationError,
+  LocationNotFoundError,
+  InvalidLocationCodeError,
+  SearchError,
+  DataValidationError,
+  ConfigurationError,
+} from "./errors/LocationErrors";
