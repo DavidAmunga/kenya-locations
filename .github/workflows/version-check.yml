@@ -26,14 +26,10 @@ jobs:
 
       - name: Check if version was bumped
         run: |
-          # Get the version from the PR branch
-          PR_VERSION=$(node -p "require('./package.json').version")
-
-          # Get the version from main branch
-          git fetch origin main
-          git checkout origin/main -- package.json
-          MAIN_VERSION=$(node -p "require('./package.json').version")
-          git checkout - -- package.json
+          # Read versions directly from git objects — no working-tree changes needed,
+          # and works correctly in detached HEAD (PR merge ref) state.
+          PR_VERSION=$(git show HEAD:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          MAIN_VERSION=$(git show origin/main:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
 
           echo "Main branch version: $MAIN_VERSION"
           echo "PR branch version: $PR_VERSION"
