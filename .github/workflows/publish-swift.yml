@@ -32,7 +32,7 @@ jobs:
         working-directory: ${{ github.workspace }}
 
       - name: Copy data files into Resources
-        run: cp ../../data/*.json Sources/KenyaLocations/Resources/
+        run: mkdir -p Sources/KenyaLocations/Resources && cp ../../data/*.json Sources/KenyaLocations/Resources/
 
       - name: Build
         run: swift build -c release
