@@ -46,7 +46,7 @@ jobs:
 
       - name: Publish to npm
         working-directory: ${{ github.workspace }}
-        run: pnpm --filter kenya-locations changeset:publish
+        run: pnpm changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
