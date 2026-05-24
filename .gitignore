@@ -17,6 +17,10 @@ packages/kotlin/.gradle
 apps/web/node_modules
 apps/web/dist
 
+# Swift build artefacts
+.build/
+packages/swift/.build/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

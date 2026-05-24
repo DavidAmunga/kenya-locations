@@ -103,14 +103,12 @@ jobs:
     needs: changes
     if: needs.changes.outputs.swift == 'true'
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: packages/swift
     steps:
       - uses: actions/checkout@v4
       - name: Copy data files into Resources
-        run: mkdir -p Sources/KenyaLocations/Resources && cp ../../data/*.json Sources/KenyaLocations/Resources/
-      - name: Build
+        run: mkdir -p packages/swift/Sources/KenyaLocations/Resources && cp data/*.json packages/swift/Sources/KenyaLocations/Resources/
+      - name: Build (root Package.swift — validates SPM install URL)
         run: swift build -c release
-      - name: Test
+      - name: Test (packages/swift Package.swift)
         run: swift test
+        working-directory: packages/swift
