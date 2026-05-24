@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+packages/js/node_modules
+packages/kotlin/build
+packages/kotlin/.gradle
+apps/web/node_modules
+apps/web/dist
 
 # Editor directories and files
 .vscode/*

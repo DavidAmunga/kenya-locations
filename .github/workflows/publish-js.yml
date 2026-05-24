@@ -1,0 +1,89 @@
+name: Publish JS to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release_branch:
+        description: "Create release branch (e.g., release/v0.5.0)"
+        required: false
+        type: boolean
+        default: true
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish:
+    name: Build & Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    defaults:
+      run:
+        working-directory: packages/js
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Validate shared data
+        run: node ../../scripts/validate-data.js
+
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm build
+      - run: pnpm test
+
+      - name: Get package version
+        id: package_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create release branch
+        if: inputs.create_release_branch
+        run: |
+          BRANCH_NAME="release/v${{ steps.package_version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+          echo "Created release branch: $BRANCH_NAME" >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish to npm
+        id: publish
+        run: |
+          pnpm changeset:publish
+          git push origin --follow-tags
+          echo "published=true" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+
+      - name: Create GitHub Release
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          VERSION="${{ steps.package_version.outputs.version }}"
+          TAG="v$VERSION"
+          CHANGELOG_CONTENT=$(awk -v ver="$VERSION" '/^## /{if(found) exit; if(index($0,ver)) found=1; next} found{print}' CHANGELOG.md)
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT="Release v$VERSION"
+          fi
+          gh release create "$TAG" --title "$TAG" --notes "$CHANGELOG_CONTENT" --verify-tag || true
+          echo "## Published kenya-locations@$VERSION to npm" >> $GITHUB_STEP_SUMMARY
+          echo "- [npm](https://www.npmjs.com/package/kenya-locations)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/$TAG)" >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

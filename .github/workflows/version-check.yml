@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "package.json"
+      - "packages/js/package.json"
 
 jobs:
   check-version:
@@ -28,8 +28,8 @@ jobs:
         run: |
           # Read versions directly from git objects — no working-tree changes needed,
           # and works correctly in detached HEAD (PR merge ref) state.
-          PR_VERSION=$(git show HEAD:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
-          MAIN_VERSION=$(git show origin/main:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          PR_VERSION=$(git show HEAD:packages/js/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          MAIN_VERSION=$(git show origin/main:packages/js/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
 
           echo "Main branch version: $MAIN_VERSION"
           echo "PR branch version: $PR_VERSION"

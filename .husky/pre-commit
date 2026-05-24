@@ -1,9 +1,12 @@
 #!/usr/bin/env sh
 
-# Run lint-staged to check and fix staged files
+# Validate data/*.json if any data files are staged (root lint-staged)
 npx lint-staged
 
-# Run tests to ensure nothing is broken
-pnpm test
+# Lint/format staged files inside packages/js using its own config
+npx lint-staged --cwd packages/js
+
+# Run JS tests to ensure nothing is broken
+pnpm --filter kenya-locations test
 
 echo "✅ Pre-commit checks passed! Ready to commit."

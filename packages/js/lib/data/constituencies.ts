@@ -1,4 +1,4 @@
 import type { Constituency } from "../types";
-import raw from "./constituencies.json";
+import raw from "../../../../data/constituencies.json";
 
 export const constituencies: Constituency[] = raw;

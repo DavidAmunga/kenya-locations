@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - ".changeset/*.md"
-      - "!.changeset/README.md"
+      - "packages/js/.changeset/*.md"
+      - "!packages/js/.changeset/README.md"
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -35,12 +35,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: packages/js
 
       - name: Create or Update Version PR
         id: changesets
         uses: changesets/action@v1
         with:
-          version: pnpm changeset:version
+          version: pnpm --filter kenya-locations changeset:version
           commit: "chore: version packages"
           title: "chore: version packages"
         env:

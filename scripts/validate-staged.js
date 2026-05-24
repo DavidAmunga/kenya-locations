@@ -42,12 +42,12 @@ function getStagedFiles() {
 
 function hasDataFiles(stagedFiles) {
   const dataFilePatterns = [
-    "lib/data/counties.json",
-    "lib/data/sub-counties.json",
-    "lib/data/constituencies.json",
-    "lib/data/wards.json",
-    "lib/data/locality.json",
-    "lib/data/area.json",
+    "data/counties.json",
+    "data/sub-counties.json",
+    "data/constituencies.json",
+    "data/wards.json",
+    "data/locality.json",
+    "data/area.json",
   ];
 
   return stagedFiles.some((file) =>

@@ -29,7 +29,7 @@ function log(message, color = "reset") {
 
 function readJson(filename) {
   try {
-    const fullPath = join(__dirname, "../lib/data", filename);
+    const fullPath = join(__dirname, "../data", filename);
     return JSON.parse(readFileSync(fullPath, "utf-8"));
   } catch (error) {
     log(`❌ Failed to read ${filename}: ${error.message}`, "red");
