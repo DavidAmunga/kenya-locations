@@ -2,11 +2,6 @@ name: Publish Kotlin to Maven Central
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to publish (e.g. 0.5.0) — must match gradle.properties VERSION_NAME"
-        required: true
-        type: string
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -24,6 +19,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Read version from gradle.properties
+        id: version
+        run: |
+          VERSION=$(grep "^VERSION_NAME=" gradle.properties | cut -d'=' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
 
       - uses: actions/setup-java@v4
         with:
@@ -56,10 +58,10 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## Published io.github.davidamunga:kenya-locations:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Published io.github.davidamunga:kenya-locations:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`kotlin" >> $GITHUB_STEP_SUMMARY
-          echo "implementation(\"io.github.davidamunga:kenya-locations:${{ inputs.version }}\")" >> $GITHUB_STEP_SUMMARY
+          echo "implementation(\"io.github.davidamunga:kenya-locations:${{ steps.version.outputs.version }}\")" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- [Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations/${{ inputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations/${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
