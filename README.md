@@ -5,7 +5,7 @@
 [![CI](https://github.com/DavidAmunga/kenya-locations/actions/workflows/ci.yml/badge.svg)](https://github.com/DavidAmunga/kenya-locations/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Kenyan administrative divisions — counties, sub-counties, constituencies, wards, localities, and areas — packaged as a fast, well-typed library for JavaScript/TypeScript and Kotlin/JVM.
+Kenyan administrative divisions — counties, sub-counties, constituencies, wards, localities, and areas — packaged as a fast, well-typed library for JavaScript/TypeScript, Kotlin/JVM, and Swift.
 
 **47** counties · **307** sub-counties · **290** constituencies · **1,448** wards · **916** localities · **1,829** areas
 
@@ -17,8 +17,9 @@ Kenyan administrative divisions — counties, sub-counties, constituencies, ward
 |---|---|---|
 | **JavaScript / TypeScript** | [`kenya-locations`](https://www.npmjs.com/package/kenya-locations) | `npm install kenya-locations` |
 | **Kotlin / JVM** (Android, Spring Boot, etc.) | [`io.github.davidamunga:kenya-locations`](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations) | See below |
+| **Swift** (iOS, macOS, tvOS, watchOS) | [`KenyaLocations`](https://swiftpackageindex.com/davidamunga/kenya-locations) | See below |
 
-Both packages are built from the same JSON source data and share identical version numbers.
+All packages are built from the same JSON source data and share identical version numbers.
 
 ---
 
@@ -42,6 +43,26 @@ dependencies {
 ```
 
 Works on Android, Spring Boot, Ktor, CLI tools, and any JVM project. No Android SDK or special initialisation required — data loads lazily from the JAR classpath on first access.
+
+### Swift (iOS, macOS, tvOS, watchOS)
+
+In Xcode: **File → Add Package Dependencies** and enter `https://github.com/DavidAmunga/kenya-locations`, or add to `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/DavidAmunga/kenya-locations", from: "0.5.0"),
+],
+targets: [
+    .target(
+        name: "YourTarget",
+        dependencies: [
+            .product(name: "KenyaLocations", package: "kenya-locations"),
+        ]
+    ),
+]
+```
+
+Requires Swift 5.9+ / iOS 13+ / macOS 10.15+. Data loads lazily from the app bundle on first access.
 
 ---
 
@@ -79,6 +100,24 @@ val results    = KenyaLocations.search("karen")
 
 // Java
 List<County> counties = KenyaLocations.INSTANCE.getCounties();
+```
+
+### Swift
+
+```swift
+import KenyaLocations
+
+let kl = KenyaLocations.shared
+
+// Get all counties
+let counties = kl.getCounties()
+
+// Relational queries
+let wards      = kl.getWardsInConstituency("Westlands")
+let localities = kl.getLocalitiesInCounty("Nairobi City")
+
+// Search across all entity types
+let results = kl.search("karen", limit: 10)
 ```
 
 ---
@@ -259,10 +298,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for data structure, validation rules, and
 
 ```
 kenya-locations/
-├── data/                    ← shared JSON source of truth (both libraries read from here)
+├── data/                    ← shared JSON source of truth (all libraries read from here)
 ├── packages/
 │   ├── js/                  ← TypeScript library → npm: kenya-locations
-│   └── kotlin/              ← Kotlin/JVM library → Maven: io.github.davidamunga:kenya-locations
+│   ├── kotlin/              ← Kotlin/JVM library → Maven: io.github.davidamunga:kenya-locations
+│   └── swift/               ← Swift library → Swift Package Index: KenyaLocations
 ├── apps/
 │   └── web/                 ← interactive demo (kenya-locations.web.app)
 └── scripts/

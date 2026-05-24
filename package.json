@@ -10,7 +10,7 @@
     "lint": "pnpm --filter kenya-locations lint",
     "prepare": "husky",
     "changeset": "changeset",
-    "changeset:version": "changeset version && node scripts/sync-kotlin-version.js",
+    "changeset:version": "changeset version && node scripts/sync-kotlin-version.js && node scripts/sync-swift-version.js",
     "changeset:publish:js": "pnpm --filter kenya-locations changeset:publish"
   },
   "devDependencies": {

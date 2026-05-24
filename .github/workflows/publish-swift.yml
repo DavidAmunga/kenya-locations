@@ -1,0 +1,60 @@
+name: Publish Swift Package
+
+on:
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish:
+    name: Build, Test & Tag Swift Release
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: packages/swift
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Validate shared data
+        run: node scripts/validate-data.js
+        working-directory: ${{ github.workspace }}
+
+      - name: Copy data files into Resources
+        run: cp ../../data/*.json Sources/KenyaLocations/Resources/
+
+      - name: Build
+        run: swift build -c release
+
+      - name: Test
+        run: swift test
+
+      - name: Create and push git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.version.outputs.version }}" || echo "Tag already exists"
+          git push origin "v${{ steps.version.outputs.version }}" || echo "Tag already pushed"
+
+      - name: Summary
+        run: |
+          echo "## Published KenyaLocations ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Swift Package Manager — add via Xcode or \`Package.swift\`:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`swift" >> $GITHUB_STEP_SUMMARY
+          echo ".package(url: \"https://github.com/DavidAmunga/kenya-locations\", from: \"${{ steps.version.outputs.version }}\")" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [Swift Package Index](https://swiftpackageindex.com/DavidAmunga/kenya-locations)" >> $GITHUB_STEP_SUMMARY

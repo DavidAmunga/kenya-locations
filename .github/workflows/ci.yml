@@ -15,6 +15,7 @@ jobs:
       data: ${{ steps.filter.outputs.data }}
       js: ${{ steps.filter.outputs.js }}
       kotlin: ${{ steps.filter.outputs.kotlin }}
+      swift: ${{ steps.filter.outputs.swift }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -28,6 +29,9 @@ jobs:
               - 'data/**'
             kotlin:
               - 'packages/kotlin/**'
+              - 'data/**'
+            swift:
+              - 'packages/swift/**'
               - 'data/**'
 
   # ── Validate shared data ───────────────────────────────────────────────────
@@ -92,3 +96,21 @@ jobs:
         run: ./gradlew build
       - name: Test
         run: ./gradlew test
+
+  # ── Swift package ─────────────────────────────────────────────────────────
+  ci-swift:
+    name: Swift — Build & Test
+    needs: changes
+    if: needs.changes.outputs.swift == 'true'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: packages/swift
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy data files into Resources
+        run: cp ../../data/*.json Sources/KenyaLocations/Resources/
+      - name: Build
+        run: swift build -c release
+      - name: Test
+        run: swift test
