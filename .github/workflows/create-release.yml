@@ -9,7 +9,7 @@ jobs:
     name: Tag and create draft release
     runs-on: ubuntu-latest
     # Only run when the Version Packages PR is merged (changesets commit message)
-    if: startsWith(github.event.head_commit.message, 'chore: version packages')
+    if: "startsWith(github.event.head_commit.message, 'chore: version packages')"
     permissions:
       contents: write
 
