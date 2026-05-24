@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+### Patch Changes
+
+- [`723ded7`](https://github.com/davidamunga/kenya-locations/commit/723ded75c9f6c35889375675c215337bc74bc7c5)
+  Thanks [@davidamunga](https://github.com/davidamunga)! - feat: unify platform releases
+
 ## 0.5.0
 
 ### Minor Changes
