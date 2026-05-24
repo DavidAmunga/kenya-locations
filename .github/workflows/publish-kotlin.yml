@@ -36,7 +36,7 @@ jobs:
         run: node scripts/validate-data.js
         working-directory: ${{ github.workspace }}
 
-      - name: Copy data files into res/raw
+      - name: Copy data files into resources
         run: ./gradlew copyLocationData
 
       - name: Build JAR
@@ -53,24 +53,6 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY }}
-
-      - name: Tag release
-        run: |
-          TAG="android/v${{ inputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "$TAG" -m "android v${{ inputs.version }}"
-          git push origin "$TAG"
-          gh release create "$TAG" \
-            --title "android v${{ inputs.version }}" \
-            --notes "### Installation
-          \`\`\`kotlin
-          implementation(\"io.github.davidamunga:kenya-locations:${{ inputs.version }}\")
-          \`\`\`
-          [View on Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations/${{ inputs.version }})" \
-            || true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         run: |
