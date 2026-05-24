@@ -1,4 +1,5 @@
 import XCTest
+@testable import KenyaLocations
 
 // Resolve data/ relative to this test file: Tests/KenyaLocationsTests/ → ../../../data/
 private let dataDir: URL = URL(fileURLWithPath: #file)
