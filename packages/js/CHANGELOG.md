@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2
+
+### Patch Changes
+
+- [`7c8399c`](https://github.com/davidamunga/kenya-locations/commit/7c8399c6011c95680ab8e5a2a8f220b727654ad1)
+  Thanks [@davidamunga](https://github.com/davidamunga)! - chore: fix release workflow
+
 ## 0.5.1
 
 ### Patch Changes
