@@ -5,8 +5,14 @@ on:
     branches:
       - main
     paths:
-      - "packages/js/.changeset/*.md"
-      - "!packages/js/.changeset/README.md"
+      - ".changeset/*.md"
+      - "!.changeset/README.md"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manually triggering (optional)"
+        required: false
+        type: string
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
