@@ -1,821 +1,278 @@
 # Kenya Locations
 
-A comprehensive and intuitive TypeScript package for working with Kenyan administrative divisions
-including the complete hierarchy: **Counties → Localities → Areas**, plus sub-counties,
-constituencies, and wards.
+[![npm version](https://img.shields.io/npm/v/kenya-locations.svg)](https://www.npmjs.com/package/kenya-locations)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.davidamunga/kenya-locations.svg)](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations)
+[![CI](https://github.com/DavidAmunga/kenya-locations/actions/workflows/ci.yml/badge.svg)](https://github.com/DavidAmunga/kenya-locations/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Author
+Kenyan administrative divisions — counties, sub-counties, constituencies, wards, localities, and areas — packaged as a fast, well-typed library for JavaScript/TypeScript and Kotlin/JVM.
 
-**David Amunga**  
-Website: [https://davidamunga.com](https://davidamunga.com)
+**47** counties · **307** sub-counties · **290** constituencies · **1,448** wards · **916** localities · **1,829** areas
 
-## Features
+---
 
-- **Complete Administrative Hierarchy** - County → Locality → Area with sub-counties,
-  constituencies, and wards
-- **Intuitive Chainable API** - Navigate Kenya's administrative hierarchy with ease
-- **Fuzzy Search** - Search across all administrative levels (counties, localities, areas,
-  constituencies, wards, sub-counties)
-- **TypeScript Support** - Full type definitions included
-- **High Performance** - Optimized Maps and pre-computed relationships for fast lookups
-- **Complete Data** - All 47 counties, their localities, areas, sub-counties, constituencies, and
-  wards
-- **Lightweight** - Minimal dependencies
-- **Well-Documented** - Comprehensive API documentation with examples
-- **Well-Tested** - Extensive unit test coverage
+## Packages
+
+| Platform | Package | Install |
+|---|---|---|
+| **JavaScript / TypeScript** | [`kenya-locations`](https://www.npmjs.com/package/kenya-locations) | `npm install kenya-locations` |
+| **Kotlin / JVM** (Android, Spring Boot, etc.) | [`io.github.davidamunga:kenya-locations`](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations) | See below |
+
+Both packages are built from the same JSON source data and share identical version numbers.
+
+---
 
 ## Installation
 
+### JavaScript / TypeScript
+
 ```bash
 npm install kenya-locations
+# pnpm add kenya-locations
+# yarn add kenya-locations
 ```
 
-Or using other package managers:
+### Kotlin / JVM
 
-```bash
-# pnpm
-pnpm add kenya-locations
-
-# yarn
-yarn add kenya-locations
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("io.github.davidamunga:kenya-locations:0.5.4")
+}
 ```
 
-### Basic Example
+Works on Android, Spring Boot, Ktor, CLI tools, and any JVM project. No Android SDK or special initialisation required — data loads lazily from the JAR classpath on first access.
 
-```typescript
-// Tree-shakeable imports (recommended — only loads what you need)
-import { getCounties, county } from "kenya-locations/counties";
-import { getLocalities } from "kenya-locations/localities";
-import { search } from "kenya-locations/search";
-
-// Or import everything from the main package
-import { getCounties, getLocalities, search } from "kenya-locations";
-```
-
-### Available Modules
-
-| Module                           | Use Case                              |
-| -------------------------------- | ------------------------------------- |
-| `kenya-locations/counties`       | County dropdowns, county information  |
-| `kenya-locations/localities`     | Locality selection, neighborhood data |
-| `kenya-locations/areas`          | Area/estate selection                 |
-| `kenya-locations/constituencies` | Electoral data, constituency info     |
-| `kenya-locations/wards`          | Ward-level data                       |
-| `kenya-locations/sub-counties`   | Sub-county information                |
-| `kenya-locations/search`         | Search functionality                  |
-| `kenya-locations/version`        | Package version string                |
-
-**Full package:** 2.56 kB (gzipped)
-
-## Hierarchy
-
-The library supports the complete Kenyan administrative hierarchy:
-
-```
-County (47 counties)
-├── Locality (e.g., Westlands, Embakasi)
-│   └── Area (e.g., Gigiri, Karen C)
-├── Sub-County
-├── Constituency (e.g., Westlands)
-│   └── Ward (e.g., Mountain View)
-```
+---
 
 ## Quick Start
 
-### Import Everything
+### JavaScript / TypeScript
 
 ```typescript
-import {
-  getCounties,
-  county,
-  getConstituencies,
-  getWards,
-  getLocalities,
-  getAreas,
-  search,
-} from "kenya-locations";
+// Tree-shakeable imports (recommended)
+import { getCounties, county } from "kenya-locations/counties";
+import { getLocalitiesInCounty } from "kenya-locations/localities";
+import { search } from "kenya-locations/search";
 
 // Get all counties
-const counties = getCounties();
+const counties = getCounties(); // County[]
 
-// Get specific county with chainable methods
+// Chainable API
 const nairobi = county("Nairobi");
 const localities = nairobi?.localities();
+const westlands = nairobi?.locality("Westlands");
+const areas = westlands?.areas();
 
-// Search across all types
-const results = search("Westlands");
+// Search across all entity types
+const results = search("karen", { limit: 10 });
 ```
 
-### Tree-Shakeable Import
+### Kotlin / JVM
+
+```kotlin
+// No init() required — just call directly
+val counties   = KenyaLocations.getCounties()
+val wards      = KenyaLocations.getWardsInConstituency("Westlands")
+val localities = KenyaLocations.getLocalitiesInCounty("Nairobi City")
+val results    = KenyaLocations.search("karen")
+
+// Java
+List<County> counties = KenyaLocations.INSTANCE.getCounties();
+```
+
+---
+
+## Data Hierarchy
+
+```
+County (47)
+├── Locality → Area          (informal addressing: estates, neighbourhoods)
+│   916 localities · 1,829 areas
+└── Constituency → Ward      (electoral / administrative)
+    290 constituencies · 1,448 wards
+    └── Sub-County (307)
+```
+
+---
+
+## JavaScript API
+
+### Modules
+
+Import only what you need for optimal tree-shaking:
+
+| Module | Contents |
+|---|---|
+| `kenya-locations/counties` | `getCounties`, `getCountyByCode`, `getCountyByName`, `county` |
+| `kenya-locations/localities` | `getLocalities`, `getLocalityByName`, `getLocalitiesByName`, `getLocalitiesInCounty`, `locality` |
+| `kenya-locations/areas` | `getAreas`, `getAreaByName`, `getAreasInLocality`, `getAreasInCounty` |
+| `kenya-locations/constituencies` | `getConstituencies`, `getConstituencyByCode`, `getConstituencyByName`, `getWardsInConstituency` |
+| `kenya-locations/wards` | `getWards`, `getWardByCode`, `getWardByName`, `getWardsInCounty` |
+| `kenya-locations/sub-counties` | `getSubCounties`, `getSubCountiesInCounty`, `getWardsInSubCounty` |
+| `kenya-locations/search` | `search`, `searchByType` |
+| `kenya-locations/version` | `DATA_VERSION` |
+
+Or import everything from the root entry point:
 
 ```typescript
-// Import only counties module
-import { getCounties, county } from "kenya-locations/counties";
-
-const counties = getCounties();
-const nairobi = county("047"); // By code or name
+import { getCounties, search, county, DATA_VERSION } from "kenya-locations";
 ```
 
-## Usage
-
-### Working with Counties
-
-```typescript
-import { getCounties, county } from "kenya-locations/counties";
-// Or: import { getCounties, county } from "kenya-locations";
-
-// Get all counties
-const allCounties = getCounties();
-console.log(`Total counties: ${allCounties.length}`); // 47
-
-// Get a specific county by name or code
-const mombasa = county("Mombasa"); // by name
-const nairobi = county("047"); // by code
-
-// Access county information
-console.log(mombasa?.name); // "Mombasa"
-console.log(mombasa?.code); // "001"
-```
-
-### Working with Localities
-
-```typescript
-import {
-  getLocalities,
-  getLocalityByName,
-  getLocalitiesInCounty,
-  locality,
-} from "kenya-locations/localities";
-
-// Get all localities
-const allLocalities = getLocalities();
-console.log(`Total localities: ${allLocalities.length}`); // 916
-
-// Get a specific locality by name
-const westlands = getLocalityByName("Westlands");
-console.log(westlands?.county); // "Nairobi"
-
-// Get all localities in a county
-const nairobiLocalities = getLocalitiesInCounty("Nairobi");
-
-// Get locality with optional county filter
-const westlandsInNairobi = locality("Westlands", "Nairobi");
-const anyWestlands = locality("Westlands"); // First match (if name is unique across counties)
-
-// Get ALL localities sharing a name (useful when the same name appears in multiple counties)
-import { getLocalitiesByName } from "kenya-locations/localities";
-const allTowns = getLocalitiesByName("Town"); // Returns LocalityWrapper[] for every county
-```
-
-### Working with Areas
-
-```typescript
-import {
-  getAreas,
-  getAreaByName,
-  getAreasInLocality,
-  getAreasInCounty,
-} from "kenya-locations/areas";
-
-// Get all areas
-const allAreas = getAreas();
-console.log(`Total areas: ${allAreas.length}`); // 1,829
-
-// Get a specific area by name
-const gigiri = getAreaByName("Gigiri");
-console.log(gigiri?.locality); // "Westlands"
-console.log(gigiri?.county); // "Nairobi"
-
-// Get all areas in a locality
-const westlandsAreas = getAreasInLocality("Westlands");
-
-// Get all areas in a county
-const nairobiAreas = getAreasInCounty("Nairobi");
-```
-
-### Working with Constituencies
-
-```typescript
-import {
-  getConstituencies,
-  getConstituencyByCode,
-  getWardsInConstituency,
-} from "kenya-locations/constituencies";
-
-// Get all constituencies
-const constituencies = getConstituencies();
-console.log(`Total constituencies: ${constituencies.length}`); // 290
-
-// Get a specific constituency by code
-const changamwe = getConstituencyByCode("001");
-console.log(changamwe?.name); // "Changamwe"
-console.log(changamwe?.county); // "Mombasa"
-
-// Get all wards in a constituency
-const wards = getWardsInConstituency("Westlands");
-```
-
-### Working with Wards
-
-```typescript
-import { getWards, getWardsInCounty, getCountyOfWard } from "kenya-locations/wards";
-
-// Get all wards
-const allWards = getWards();
-console.log(`Total wards: ${allWards.length}`); // 1,448
-
-// Get all wards in a county
-const wardsInNairobi = getWardsInCounty("Nairobi");
-console.log(`Wards in Nairobi: ${wardsInNairobi.length}`); // 85
-
-// Get the county a ward belongs to
-const wardCounty = getCountyOfWard("0001");
-```
-
-### Working with Sub-Counties
-
-```typescript
-import {
-  getSubCounties,
-  getSubCountiesInCounty,
-  getCountyOfSubCounty,
-} from "kenya-locations/sub-counties";
-
-// Get all sub-counties
-const allSubCounties = getSubCounties();
-console.log(`Total sub-counties: ${allSubCounties.length}`); // 307
-
-// Get all sub-counties in a county (supports both name and code)
-const subCountiesInNairobi = getSubCountiesInCounty("Nairobi"); // by name
-const subCountiesInNairobiByCode = getSubCountiesInCounty("047"); // by code
-
-// Get the county a sub-county belongs to
-const subCountyCounty = getCountyOfSubCounty("Westlands");
-
-// Get wards in a sub-county — accepts sub-county name OR code
-import { getWardsInSubCounty } from "kenya-locations/sub-counties";
-const wardsByCode = getWardsInSubCounty("154"); // by sub-county code
-const wardsByName = getWardsInSubCounty("Ainabkoi"); // by sub-county name
-```
-
-### Chainable API
-
-The package provides a chainable API for navigating the administrative hierarchy:
+### Chainable Wrappers
 
 ```typescript
 import { county } from "kenya-locations/counties";
-import { getLocalityByName } from "kenya-locations/localities";
+import { locality } from "kenya-locations/localities";
 
-// Working with Counties
-const nairobi = county("Nairobi");
+// County → drill down
+county("Nairobi")?.constituencies();           // ConstituencyWrapper[]
+county("Nairobi")?.constituency("Westlands");  // ConstituencyWrapper
+county("Nairobi")?.localities();               // LocalityWrapper[]
+county("Nairobi")?.locality("Westlands");      // LocalityWrapper
+county("Nairobi")?.areas();                    // Area[]
+county("047")?.wards();                        // Ward[]
 
-// Get constituencies in a county
-const constituencies = nairobi?.constituencies();
+// Constituency → wards
+county("Nairobi")?.constituency("Westlands")?.wards();
 
-// Get a specific constituency in a county
-const westlands = nairobi?.constituency("Westlands");
-
-// Get localities in a county
-const localities = nairobi?.localities();
-
-// Get a specific locality in a county
-const embakasi = nairobi?.locality("Embakasi");
-
-// Get areas in a county
-const areas = nairobi?.areas();
-
-// Get areas in a specific locality within a county
-const westlandsAreas = nairobi?.areasByLocality("Westlands");
-
-// Access county information directly from constituency
-console.log(westlands?.county); // "Nairobi"
-
-// Get wards in a constituency
-const wards = westlands?.wards();
-
-// Get a specific ward in a constituency
-const ward = westlands?.ward("Mountain View");
-
-// Working with Localities
-const westlandsLocality = getLocalityByName("Westlands");
-
-// Get all areas in this locality
-const localityAreas = westlandsLocality?.areas();
-
-// Get a specific area in the locality
-const gigiri = westlandsLocality?.area("Gigiri");
-
-// Get the county this locality belongs to
-const countyObj = westlandsLocality?.getCounty();
+// Locality → areas
+locality("Westlands")?.areas();
+locality("Westlands")?.area("Gigiri");
+locality("Westlands")?.getCounty();
 ```
 
-### Search Functionality
-
-The package includes a powerful fuzzy search feature that works across all administrative levels:
+### Search
 
 ```typescript
 import { search, searchByType } from "kenya-locations/search";
 
-// Search across all administrative levels
-const results = search("Westlands");
-/*
-Results include:
-[
-  { type: 'locality', item: { name: 'Westlands', county: 'Nairobi' } },
-  { type: 'constituency', item: { code: '290', name: 'Westlands', county: 'Nairobi' } },
-  { type: 'area', item: { name: 'Gigiri', locality: 'Westlands', county: 'Nairobi' } },
-  // ... more results
-]
-*/
+// Search all types
+const results = search("westlands");
+// [{ type: 'locality', item: {...} }, { type: 'constituency', item: {...} }, ...]
 
-// Search for specific types
-const countyResults = search("Nairobi", { types: ["county"] });
-const localityResults = search("West", { types: ["locality", "area"] });
-
-// Search with limit
-const limitedResults = search("Nairobi", { limit: 5 });
-
-// Search handles typos and partial matches
-const typoResults = search("Nairob"); // Still finds Nairobi-related locations
-
-// Search for a specific type
-const counties = searchByType("Nairob", "county", 5);
-const localities = searchByType("West", "locality", 10);
+// Filter by type and limit
+const counties    = search("nairobi", { types: ["county"], limit: 5 });
+const localities  = searchByType("west", "locality", 10);
 ```
 
-### Complete Hierarchy Navigation
+### Data Types
 
 ```typescript
-import { county, getAreaByName, getLocalityOfArea, getCountyOfArea } from "kenya-locations";
+interface County        { code: string; name: string; }
+interface SubCounty     { code: string; name: string; county: string; }
+interface Constituency  { code: string; name: string; county: string; }
+interface Ward          { code: string; name: string; constituency: string; }
+interface Locality      { name: string; county: string; }
+interface Area          { name: string; locality: string; county: string; }
 
-// Start from county and drill down
-const nairobi = county("Nairobi");
-const westlands = nairobi?.locality("Westlands");
-const gigiri = westlands?.area("Gigiri");
-
-console.log(`Found: ${gigiri.name} in ${gigiri.locality}, ${gigiri.county}`);
-// Output: "Found: Gigiri in Westlands, Nairobi"
-
-// Start from area and go up the hierarchy
-const area = getAreaByName("Gigiri");
-const locality = getLocalityOfArea("Gigiri");
-const countyObj = getCountyOfArea("Gigiri");
-
-console.log(`Hierarchy: ${countyObj?.name} → ${locality?.name} → ${area?.name}`);
-// Output: "Hierarchy: Nairobi → Westlands → Gigiri"
-```
-
-### Navigating Relationships
-
-```typescript
-import { getCountyOfLocality, getCountyOfArea, getLocalityOfArea } from "kenya-locations";
-
-// Find parent entities
-const areaCounty = getCountyOfArea("Gigiri"); // County object
-const areaLocality = getLocalityOfArea("Gigiri"); // Locality object
-const localityCounty = getCountyOfLocality("Westlands"); // County object
-
-console.log(areaCounty?.name); // "Nairobi"
-console.log(areaLocality?.name); // "Westlands"
-console.log(localityCounty?.name); // "Nairobi"
+interface SearchResult {
+  type: "county" | "sub-county" | "constituency" | "ward" | "locality" | "area";
+  item: County | SubCounty | Constituency | Ward | Locality | Area;
+}
 ```
 
 ### Error Handling
 
-Wrapper methods that navigate to a child entity (`.locality()`, `.area()`, `.ward()`,
-`.constituency()`) throw `LocationNotFoundError` when no match is found.
-
 ```typescript
-import { county, getLocalityByName, LocationNotFoundError, LocationError } from "kenya-locations";
+import { LocationNotFoundError, LocationError } from "kenya-locations";
 
 try {
-  const nairobi = county("Nairobi");
-  const locality = nairobi?.locality("NonExistentLocality");
-} catch (error) {
-  if (error instanceof LocationNotFoundError) {
-    console.log("Locality not found:", error.message);
-  }
-}
-
-try {
-  const westlands = getLocalityByName("Westlands");
-  const area = westlands?.area("NonExistentArea");
-} catch (error) {
-  if (error instanceof LocationNotFoundError) {
-    console.log("Area not found:", error.message);
-  }
-}
-
-// LocationError is the base class — catch any location-related error
-try {
-  const westlands = county("Westlands"); // constituency, not a county
-  westlands?.ward("Mountain View");
-} catch (error) {
-  if (error instanceof LocationError) {
-    console.log("Location error:", error.message);
-  }
+  county("Nairobi")?.locality("NonExistent"); // throws LocationNotFoundError
+} catch (e) {
+  if (e instanceof LocationNotFoundError) { ... }
 }
 ```
 
-**Error hierarchy:**
-
-```
-LocationError (base)
-├── LocationNotFoundError  — entity not found by name/code
-├── InvalidLocationCodeError — malformed code format
-├── SearchError            — search operation failure
-├── DataValidationError    — data integrity issue
-└── ConfigurationError     — invalid configuration
-```
-
-## API Reference
-
-### Counties Module
-
-**Import:** `import { ... } from "kenya-locations/counties"`
-
-- `getCounties(): County[]` - Get all counties
-- `getCountyByCode(code: string): County | undefined` - Get county by code
-- `getCountyByName(name: string): County | undefined` - Get county by name
-- `county(nameOrCode: string): CountyWrapper | undefined` - Get county with chainable methods
-
-### Localities Module
-
-**Import:** `import { ... } from "kenya-locations/localities"`
-
-- `getLocalities(): Locality[]` - Get all localities
-- `getLocalityByName(name: string): LocalityWrapper | undefined` - Get locality by name (returns
-  first match when a name appears in multiple counties)
-- `getLocalitiesByName(name: string): LocalityWrapper[]` - Get **all** localities matching a name
-  across all counties
-- `getLocalitiesInCounty(countyName: string): Locality[]` - Get localities in a county
-- `getCountyOfLocality(localityName: string): County | undefined` - Get county of locality
-- `locality(name: string, countyName?: string): LocalityWrapper | undefined` - Get locality with
-  optional county filter
-
-### Areas Module
-
-**Import:** `import { ... } from "kenya-locations/areas"`
-
-- `getAreas(): Area[]` - Get all areas
-- `getAreaByName(name: string): Area | undefined` - Get area by name
-- `getAreasInLocality(localityName: string): Area[]` - Get areas in a locality
-- `getAreasInCounty(countyName: string): Area[]` - Get areas in a county
-- `getCountyOfArea(areaName: string): County | undefined` - Get county of area
-- `getLocalityOfArea(areaName: string): Locality | undefined` - Get locality of area
-
-### Constituencies Module
-
-**Import:** `import { ... } from "kenya-locations/constituencies"`
-
-- `getConstituencies(): Constituency[]` - Get all constituencies
-- `getConstituencyByCode(code: string): ConstituencyWrapper | undefined` - Get constituency by code
-- `getConstituencyByName(name: string): ConstituencyWrapper | undefined` - Get constituency by name
-- `getWardsInConstituency(constituencyNameOrCode: string): Ward[]` - Get wards in constituency
-- `getCountyOfConstituency(constituencyNameOrCode: string): County | undefined` - Get county of
-  constituency
-
-### Wards Module
-
-**Import:** `import { ... } from "kenya-locations/wards"`
-
-- `getWards(): Ward[]` - Get all wards
-- `getWardByCode(code: string): Ward | undefined` - Get ward by code
-- `getWardByName(name: string): Ward | undefined` - Get ward by name
-- `getWardsInCounty(countyNameOrCode: string): Ward[]` - Get wards in county
-- `getCountyOfWard(wardNameOrCode: string): County | undefined` - Get county of ward
-
-### Sub-Counties Module
-
-**Import:** `import { ... } from "kenya-locations/sub-counties"`
-
-- `getSubCounties(): SubCounty[]` - Get all sub-counties
-- `getSubCountyByCode(code: string): SubCounty | undefined` - Get sub-county by code
-- `getSubCountyByName(name: string): SubCounty | undefined` - Get sub-county by name
-- `getSubCountiesInCounty(countyNameOrCode: string): SubCounty[]` - Get sub-counties in county
-- `getCountyOfSubCounty(subCountyName: string): County | undefined` - Get county of sub-county
-- `getWardsInSubCounty(nameOrCode: string): Ward[]` - Get wards in sub-county by name or code
-
-### Search Module
-
-**Import:** `import { ... } from "kenya-locations/search"`
-
-- `search(query: string, options?: SearchOptions): SearchResult[]` - Search across all or specific
-  types
-- `searchByType(query: string, type: SearchType, limit?: number): SearchResult[]` - Search for
-  specific type
-
-**SearchOptions Interface:**
-
-```typescript
-interface SearchOptions {
-  limit?: number; // Maximum number of results
-  types?: SearchType[]; // Types to search: 'county' | 'constituency' | 'ward' | 'sub-county' | 'locality' | 'area'
-}
-```
-
-### Version
-
-- `DATA_VERSION: string` - The current package version string, automatically derived from
-  `package.json`. Always in sync with the published npm version — no manual maintenance required.
-
-```typescript
-import { DATA_VERSION } from "kenya-locations";
-console.log(DATA_VERSION); // e.g. "0.4.0"
-```
-
-### Wrapper Classes
-
-#### CountyWrapper
-
-Provides chainable methods for navigating from a county.
-
-> **Note:** When importing from the main `kenya-locations` package, `constituencies()` returns
-> `ConstituencyWrapper[]` and `constituency()` returns a `ConstituencyWrapper`. When importing from
-> `kenya-locations/counties`, these methods return plain `Constituency` / `Constituency[]` objects.
-
-- `code: string` - Get the county code
-- `name: string` - Get the county name
-- `data: County` - Get all data for the county
-- `constituencies(): ConstituencyWrapper[] | Constituency[]` - Get all constituencies in this county
-- `constituency(nameOrCode: string): ConstituencyWrapper | Constituency` - Get a constituency by
-  name or code (throws `LocationNotFoundError` if not found)
-- `localities(): LocalityWrapper[] | Locality[]` - Get all localities in this county
-- `locality(name: string): LocalityWrapper | Locality` - Get a locality by name (throws
-  `LocationNotFoundError` if not found)
-- `areas(): Area[]` - Get all areas in this county
-- `areasByLocality(localityName: string): Area[]` - Get areas in a specific locality
-- `wards(): Ward[]` - Get all wards in this county
-
-#### ConstituencyWrapper
-
-Provides chainable methods for navigating from a constituency:
-
-- `code: string` - Get the constituency code
-- `name: string` - Get the constituency name
-- `county: string` - Get the county name this constituency belongs to
-- `data: Constituency` - Get all data for the constituency
-- `getCounty(): County | undefined` - Get the county this constituency belongs to
-- `wards(): Ward[]` - Get all wards in this constituency
-- `ward(nameOrCode: string): Ward` - Get a ward by name or code
-
-#### LocalityWrapper
-
-Provides chainable methods for navigating from a locality:
-
-- `name: string` - Get the locality name
-- `county: string` - Get the county name this locality belongs to
-- `data: Locality` - Get all data for the locality
-- `getCounty(): County | undefined` - Get the county this locality belongs to
-- `areas(): Area[]` - Get all areas in this locality
-- `area(name: string): Area` - Get an area by name
-
-### Data Interfaces
-
-```typescript
-interface County {
-  code: string;
-  name: string;
-}
-
-interface Locality {
-  name: string;
-  county: string;
-}
-
-interface Area {
-  name: string;
-  locality: string;
-  county: string;
-}
-
-interface Constituency {
-  code: string;
-  name: string;
-  county: string;
-}
-
-interface Ward {
-  code: string;
-  name: string;
-  constituency: string;
-}
-
-interface SubCounty {
-  code: string;
-  name: string;
-  county: string;
-}
-
-interface SearchResult {
-  type: "county" | "constituency" | "ward" | "sub-county" | "locality" | "area";
-  item: County | Constituency | Ward | SubCounty | Locality | Area;
-}
-```
-
-## Examples
-
-The package includes comprehensive examples:
-
-- `examples/basic-usage.html` - Complete interactive example showing all functionality
-
-To run the examples:
-
-```bash
-# Clone the repository
-git clone https://github.com/DavidAmunga/kenya-locations.git
-
-# Navigate to the project
-cd kenya-locations
-
-# Install dependencies
-pnpm install
-
-# Build the library
-pnpm run build
-```
-
-## Real-World Use Cases
-
-### County Dropdown
-
-```typescript
-import { getCounties } from "kenya-locations/counties";
-
-function CountyDropdown() {
-  const counties = getCounties();
-
-  return (
-    <select>
-      {counties.map((county) => (
-        <option key={county.code} value={county.code}>
-          {county.name}
-        </option>
-      ))}
-    </select>
-  );
-}
-```
-
-### Location Search
-
-```typescript
-import { search } from "kenya-locations/search";
-
-function LocationSearch({ query }: { query: string }) {
-  const results = search(query, { limit: 10 });
-
-  return (
-    <ul>
-      {results.map((result, index) => (
-        <li key={index}>
-          {result.type}: {result.item.name}
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
-### Hierarchical Location Selector
-
-```typescript
-import { getCounties } from "kenya-locations/counties";
-import { getLocalitiesInCounty } from "kenya-locations/localities";
-import { getAreasInLocality } from "kenya-locations/areas";
-
-function AddressForm() {
-  const [county, setCounty] = useState("");
-  const [locality, setLocality] = useState("");
-
-  const counties = getCounties();
-  const localities = county ? getLocalitiesInCounty(county) : [];
-  const areas = locality ? getAreasInLocality(locality) : [];
-
-  return (
-    <form>
-      <select onChange={(e) => setCounty(e.target.value)}>
-        <option value="">Select County</option>
-        {counties.map((c) => (
-          <option key={c.code} value={c.name}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-
-      <select disabled={!county} onChange={(e) => setLocality(e.target.value)}>
-        <option value="">Select Locality</option>
-        {localities.map((l) => (
-          <option key={l.name} value={l.name}>
-            {l.name}
-          </option>
-        ))}
-      </select>
-
-      <select disabled={!locality}>
-        <option value="">Select Area</option>
-        {areas.map((a) => (
-          <option key={a.name} value={a.name}>
-            {a.name}
-          </option>
-        ))}
-      </select>
-    </form>
-  );
-}
-```
-
-## Contributing
-
-Contributions are welcome! We especially welcome contributions to expand our locality and area data.
-
-**[Read our detailed Contributing Guidelines](CONTRIBUTING.md)** for information on:
-
-- How to add new counties, sub-counties, constituencies, wards, localities, and areas
-- Data structure and validation requirements
-- Testing procedures
-- Submission guidelines
-
-**Data files are JSON.** All location data lives in `lib/data/*.json`. You do not need to know
-TypeScript to add or update entries — open the relevant JSON file, add your record, and the
-pre-commit hook will validate it automatically.
-
-**Pre-commit Hooks:** This project uses automated pre-commit hooks to ensure code quality and data
-integrity. When you commit changes, the following happen automatically:
-
-- Code formatting and linting
-- Data validation (when `lib/data/*.json` files are changed) — runs without a build step
-- Test execution
-- Commit message format validation
-
-Please feel free to submit a Pull Request following our guidelines.
-
-## Community
-
-### Get Help & Discuss
-
-- [GitHub Discussions](https://github.com/davidamunga/kenya-locations/discussions) - Ask questions,
-  share ideas
-- [Report Issues](https://github.com/davidamunga/kenya-locations/issues/new/choose) - Bug reports,
-  feature requests
-- [Documentation](./CONTRIBUTING.md) - Contributing guidelines
-
-### Code of Conduct
-
-We are committed to providing a welcoming and inclusive environment. Please read our
-[Code of Conduct](CODE_OF_CONDUCT.md).
-
-### Security
-
-Found a security vulnerability? Please review our [Security Policy](SECURITY.md) for responsible
-disclosure.
-
-### Contributors
-
-Thanks to all our contributors! See the full list in [CONTRIBUTORS.md](CONTRIBUTORS.md).
-
-Want to contribute? Check out:
-
-- [Good First Issues](https://github.com/davidamunga/kenya-locations/labels/good%20first%20issue)
-- [Data Contributions](https://kenya-locations.web.app/)
-- [Contributing Guide](CONTRIBUTING.md)
-
-## Documentation
-
-- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Data Sources
-
-The data in this package is sourced from official records of:
-
-- Independent Electoral and Boundaries Commission (IEBC) of Kenya
-- Kenya National Bureau of Statistics (KNBS)
-- County government records for locality and area classifications
-
-## Acknowledgments
-
-- The Independent Electoral and Boundaries Commission (IEBC) of Kenya
-- Kenya National Bureau of Statistics (KNBS)
-- County governments for locality and area data
-- All our [contributors](CONTRIBUTORS.md) who help make this project better
-
-## Support the Project
-
-If you find this project useful:
-
-- **Star the repository** on GitHub
-- **Share it** with others who might find it useful
-- **Report bugs** or **request features**
-- **Contribute** code or data
-- **Sponsor** the project (see [Funding](https://github.com/sponsors/davidamunga))
+Error hierarchy: `LocationError` → `LocationNotFoundError`, `InvalidLocationCodeError`, `SearchError`, `DataValidationError`, `ConfigurationError`
 
 ---
 
-**Made with care in Kenya**
+## Kotlin API
 
-For questions or support, visit [davidamunga.com](https://davidamunga.com) or open an issue on
-GitHub.
+### Getters
+
+```kotlin
+KenyaLocations.getCounties()                           // List<County>
+KenyaLocations.getCountyByCode("047")                  // County?
+KenyaLocations.getCountyByName("Nairobi City")         // County?
+KenyaLocations.getSubCounties()                        // List<SubCounty>
+KenyaLocations.getConstituencies()                     // List<Constituency>
+KenyaLocations.getWards()                              // List<Ward>
+KenyaLocations.getLocalities()                         // List<Locality>
+KenyaLocations.getAreas()                              // List<Area>
+```
+
+### Relational queries
+
+```kotlin
+KenyaLocations.getSubCountiesInCounty("Nairobi City")
+KenyaLocations.getConstituenciesInCounty("Nairobi City")
+KenyaLocations.getWardsInConstituency("Westlands")
+KenyaLocations.getWardsInCounty("Nairobi City")
+KenyaLocations.getLocalitiesInCounty("Nairobi City")
+KenyaLocations.getAreasInLocality("Karen")
+KenyaLocations.getAreasInCounty("Nairobi City")
+```
+
+### Search
+
+```kotlin
+KenyaLocations.search("karen", limit = 20)           // List<SearchResult<*>>
+KenyaLocations.searchByType("west", SearchType.WARD) // List<SearchResult<*>>
+```
+
+### Data classes
+
+```kotlin
+data class County(val code: String, val name: String)
+data class SubCounty(val code: String, val name: String, val county: String)
+data class Constituency(val code: String, val name: String, val county: String)
+data class Ward(val code: String, val name: String, val constituency: String)
+data class Locality(val name: String, val county: String)
+data class Area(val name: String, val locality: String, val county: String)
+```
+
+---
+
+## Contributing
+
+Contributions are very welcome — especially data additions (new localities, areas, corrections).
+
+**Data files are plain JSON** in `data/`. No TypeScript or Kotlin knowledge needed to add entries. The pre-commit hook validates data automatically on every commit.
+
+```
+data/
+├── counties.json
+├── sub-counties.json
+├── constituencies.json
+├── wards.json
+├── locality.json
+└── area.json
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for data structure, validation rules, and submission guidelines. Submit new areas via the [web app](https://kenya-locations.web.app/) or directly via a PR.
+
+---
+
+## Repository Structure
+
+```
+kenya-locations/
+├── data/                    ← shared JSON source of truth (both libraries read from here)
+├── packages/
+│   ├── js/                  ← TypeScript library → npm: kenya-locations
+│   └── kotlin/              ← Kotlin/JVM library → Maven: io.github.davidamunga:kenya-locations
+├── apps/
+│   └── web/                 ← interactive demo (kenya-locations.web.app)
+└── scripts/
+    └── validate-data.js     ← data integrity checks (runs on commit + CI)
+```
+
+---
+
+## License
+
+MIT © [David Amunga](https://davidamunga.com)
+
+Data sourced from the Independent Electoral and Boundaries Commission (IEBC) and Kenya National Bureau of Statistics (KNBS).
