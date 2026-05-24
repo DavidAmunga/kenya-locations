@@ -1,12 +1,12 @@
 import XCTest
 @testable import KenyaLocations
 
-// Resolve data/ relative to this test file: Tests/KenyaLocationsTests/ → ../../../data/
 private let dataDir: URL = URL(fileURLWithPath: #file)
-    .deletingLastPathComponent() // KenyaLocationsTests/
-    .deletingLastPathComponent() // Tests/
-    .deletingLastPathComponent() // swift/
-    .deletingLastPathComponent() // packages/
+    .deletingLastPathComponent() 
+    .deletingLastPathComponent() 
+    .deletingLastPathComponent() 
+    .deletingLastPathComponent() 
+    .deletingLastPathComponent()
     .appendingPathComponent("data")
 
 private func loadFixture<T: Decodable>(_ name: String) throws -> [T] {
