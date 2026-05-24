@@ -7,10 +7,10 @@
     }
   ],
   "commit": false,
-  "fixed": [],
+  "fixed": [["kenya-locations", "kenya-locations-kotlin"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": ["kenya-locations-kotlin"]
 }

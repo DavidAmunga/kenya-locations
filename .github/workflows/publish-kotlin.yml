@@ -39,8 +39,8 @@ jobs:
       - name: Copy data files into res/raw
         run: ./gradlew copyLocationData
 
-      - name: Build release AAR
-        run: ./gradlew assembleRelease
+      - name: Build JAR
+        run: ./gradlew build
 
       - name: Run tests
         run: ./gradlew test
@@ -65,19 +65,19 @@ jobs:
             --title "android v${{ inputs.version }}" \
             --notes "### Installation
           \`\`\`kotlin
-          implementation(\"io.github.davidamunga:kenya-locations-android:${{ inputs.version }}\")
+          implementation(\"io.github.davidamunga:kenya-locations:${{ inputs.version }}\")
           \`\`\`
-          [View on Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations-android/${{ inputs.version }})" \
+          [View on Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations/${{ inputs.version }})" \
             || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         run: |
-          echo "## Published io.github.davidamunga:kenya-locations-android:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Published io.github.davidamunga:kenya-locations:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`kotlin" >> $GITHUB_STEP_SUMMARY
-          echo "implementation(\"io.github.davidamunga:kenya-locations-android:${{ inputs.version }}\")" >> $GITHUB_STEP_SUMMARY
+          echo "implementation(\"io.github.davidamunga:kenya-locations:${{ inputs.version }}\")" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- [Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations-android/${{ inputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Maven Central](https://central.sonatype.com/artifact/io.github.davidamunga/kenya-locations/${{ inputs.version }})" >> $GITHUB_STEP_SUMMARY

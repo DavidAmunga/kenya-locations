@@ -35,13 +35,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: packages/js
 
       - name: Create or Update Version PR
         id: changesets
         uses: changesets/action@v1
         with:
-          version: pnpm --filter kenya-locations changeset:version
+          version: pnpm changeset:version
           commit: "chore: version packages"
           title: "chore: version packages"
         env:

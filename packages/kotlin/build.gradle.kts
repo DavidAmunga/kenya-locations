@@ -1,83 +1,58 @@
 plugins {
-    id("com.android.library") version "8.7.3"
-    id("org.jetbrains.kotlin.android") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.serialization") version "2.1.0"
     id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-android {
-    namespace = "ke.locations"
-    compileSdk = 35
-
-    defaultConfig {
-        minSdk = 21
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+kotlin {
+    jvmToolchain(17)
 }
+
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.0")
 }
 
-// ─── Copy shared JSON data from /data into res/raw before every build ─────────
+// ─── Copy shared JSON data into src/main/resources before every build ─────────
 val dataDir = rootProject.file("../../data")
 
 tasks.register<Copy>("copyLocationData") {
-    description = "Copy shared JSON data files into Android res/raw"
-    from(dataDir) {
-        include("*.json")
-        // Android resource names must be lowercase with no hyphens
-        rename("sub-counties.json", "sub_counties.json")
-    }
-    into("src/main/res/raw")
+    description = "Copy shared JSON data files into JVM classpath resources"
+    from(dataDir) { include("*.json") }
+    into("src/main/resources")
 }
 
-tasks.named("preBuild") {
+tasks.named("processResources") {
+    dependsOn("copyLocationData")
+}
+
+// sourcesJar is created by the vanniktech plugin — wire the dependency safely
+tasks.matching { it.name == "sourcesJar" }.configureEach {
     dependsOn("copyLocationData")
 }
 
 tasks.named("clean") {
     doLast {
-        delete(fileTree("src/main/res/raw") { include("*.json") })
+        delete(fileTree("src/main/resources") { include("*.json") })
     }
 }
 
-// ─── Maven Central publishing (via com.vanniktech.maven.publish) ──────────────
+// ─── Maven Central publishing ──────────────────────────────────────────────────
 mavenPublishing {
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
     coordinates(
         groupId = "io.github.davidamunga",
-        artifactId = "kenya-locations-android",
+        artifactId = "kenya-locations",
         version = providers.gradleProperty("VERSION_NAME").get()
     )
 
     pom {
-        name.set("kenya-locations-android")
-        description.set("Kenyan administrative divisions for Android — counties, constituencies, wards, sub-counties, localities and areas.")
-        url.set("https://github.com/DavidAmunga/kenya-locations")
+        name.set("kenya-locations")
+        description.set("Kenyan administrative divisions for counties, constituencies, wards, sub-counties, localities and areas. Works on Android, Spring Boot, CLI tools, and any JVM project.")
+        url.set("https://github.com/davidamunga/kenya-locations")
         inceptionYear.set("2024")
 
         licenses {
@@ -97,9 +72,9 @@ mavenPublishing {
         }
 
         scm {
-            url.set("https://github.com/DavidAmunga/kenya-locations")
-            connection.set("scm:git:git://github.com/DavidAmunga/kenya-locations.git")
-            developerConnection.set("scm:git:ssh://git@github.com/DavidAmunga/kenya-locations.git")
+            url.set("https://github.com/davidamunga/kenya-locations")
+            connection.set("scm:git:git://github.com/davidamunga/kenya-locations.git")
+            developerConnection.set("scm:git:ssh://git@github.com/davidamunga/kenya-locations.git")
         }
     }
 }

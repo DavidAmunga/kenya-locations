@@ -754,9 +754,9 @@ Please feel free to submit a Pull Request following our guidelines.
 
 ### Get Help & Discuss
 
-- [GitHub Discussions](https://github.com/DavidAmunga/kenya-locations/discussions) - Ask questions,
+- [GitHub Discussions](https://github.com/davidamunga/kenya-locations/discussions) - Ask questions,
   share ideas
-- [Report Issues](https://github.com/DavidAmunga/kenya-locations/issues/new/choose) - Bug reports,
+- [Report Issues](https://github.com/davidamunga/kenya-locations/issues/new/choose) - Bug reports,
   feature requests
 - [Documentation](./CONTRIBUTING.md) - Contributing guidelines
 
@@ -776,7 +776,7 @@ Thanks to all our contributors! See the full list in [CONTRIBUTORS.md](CONTRIBUT
 
 Want to contribute? Check out:
 
-- [Good First Issues](https://github.com/DavidAmunga/kenya-locations/labels/good%20first%20issue)
+- [Good First Issues](https://github.com/davidamunga/kenya-locations/labels/good%20first%20issue)
 - [Data Contributions](https://kenya-locations.web.app/)
 - [Contributing Guide](CONTRIBUTING.md)
 

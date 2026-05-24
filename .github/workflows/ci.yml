@@ -89,6 +89,6 @@ jobs:
       - name: Copy data files
         run: ./gradlew copyLocationData
       - name: Build
-        run: ./gradlew assembleRelease
+        run: ./gradlew build
       - name: Test
         run: ./gradlew test
