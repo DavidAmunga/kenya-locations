@@ -59,6 +59,8 @@ Tree-shakeable functions added to the root barrel (`kenya-locations`):
 
 `scripts/validate-data.js` enforces presence of all new county fields and validates `region` against the allowed `CountyRegion` values.
 
-## Cross-platform search parity (Kotlin & Swift)
+## Cross-platform fuzzy search (Kotlin & Swift)
 
-Documented TODO comments in `KenyaLocations.kt` and `KenyaLocations.swift` with exact configuration to replace substring search with `fuse-kt` (Kotlin) and `Ifrit` (Swift) to match the Fuse.js `threshold: 0.2` behaviour used on the JS platform.
+Both platforms now implement the same Levenshtein sliding-window algorithm used in the JS package, replacing the previous plain substring match. Queries like `"Nairob"` now match `"Nairobi"` across all three platforms.
+
+The implementation is self-contained (zero new runtime dependencies). The effective threshold mirrors Fuse.js at ≈ 0.4: a pattern of length *n* matches if the best sliding window has at most `floor(n × 0.4)` character errors. Results are returned sorted by relevance score, best match first.
