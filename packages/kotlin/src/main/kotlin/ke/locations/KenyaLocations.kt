@@ -90,29 +90,94 @@ object KenyaLocations {
     // ─── Search ───────────────────────────────────────────────────────────────
 
     /**
-     * Case-insensitive substring search across all entity types.
+     * Fuzzy search across all entity types using a Levenshtein sliding-window algorithm,
+     * mirroring the Fuse.js behaviour used on the JS platform (effective threshold ≈ 0.4).
+     * Tolerates minor typos — e.g. "Nairob" matches "Nairobi".
+     * Results are sorted by relevance score (best match first).
      * Returns up to [limit] results (default 20).
      */
     fun search(query: String, limit: Int = 20): List<SearchResult<*>> {
-        val q = query.lowercase()
-        return buildList {
-            _counties.filter { it.name.lowercase().contains(q) }
-                .forEach { add(SearchResult(SearchType.COUNTY, it)) }
-            _subCounties.filter { it.name.lowercase().contains(q) }
-                .forEach { add(SearchResult(SearchType.SUB_COUNTY, it)) }
-            _constituencies.filter { it.name.lowercase().contains(q) }
-                .forEach { add(SearchResult(SearchType.CONSTITUENCY, it)) }
-            _wards.filter { it.name.lowercase().contains(q) }
-                .forEach { add(SearchResult(SearchType.WARD, it)) }
-            _localities.filter { it.name.lowercase().contains(q) }
-                .forEach { add(SearchResult(SearchType.LOCALITY, it)) }
-            _areas.filter { it.name.lowercase().contains(q) }
-                .forEach { add(SearchResult(SearchType.AREA, it)) }
-        }.take(limit)
+        val q = query.trim()
+        if (q.length < 2) return emptyList()
+
+        val scored = ArrayList<Pair<Double, SearchResult<*>>>()
+
+        fun <T : Any> collect(items: List<T>, type: SearchType, name: (T) -> String) {
+            for (item in items) {
+                val score = fuzzyScore(q, name(item)) ?: continue
+                scored.add(score to SearchResult(type, item))
+            }
+        }
+
+        collect(_counties, SearchType.COUNTY) { it.name }
+        collect(_subCounties, SearchType.SUB_COUNTY) { it.name }
+        collect(_constituencies, SearchType.CONSTITUENCY) { it.name }
+        collect(_wards, SearchType.WARD) { it.name }
+        collect(_localities, SearchType.LOCALITY) { it.name }
+        collect(_areas, SearchType.AREA) { it.name }
+
+        return scored.sortedBy { it.first }.take(limit).map { it.second }
     }
 
     fun searchByType(query: String, type: SearchType, limit: Int = 20): List<SearchResult<*>> =
         search(query, limit * 6).filter { it.type == type }.take(limit)
+
+    // ─── Fuzzy matching ───────────────────────────────────────────────────────
+
+    /**
+     * Returns a relevance score in [0.0, 1.0) for [pattern] against [text], or null if
+     * no fuzzy match exists. Score 0.0 = exact substring (perfect). Higher = worse match.
+     *
+     * Algorithm: exact substring check first; then Levenshtein sliding-window with
+     * maxErrors = max(1, floor(patternLen × 0.4)). Matches only when the best window
+     * score ≤ 0.4, keeping behaviour in line with Fuse.js threshold = 0.4.
+     */
+    private fun fuzzyScore(pattern: String, text: String): Double? {
+        val p = pattern.lowercase()
+        val t = text.lowercase()
+
+        if (t.contains(p)) return 0.0
+        if (p.length < 2) return null
+
+        val pLen = p.length
+        val tLen = t.length
+        val maxErrors = maxOf(1, (pLen * 0.4).toInt())
+        val windowSize = pLen + maxErrors
+
+        var bestScore = Double.MAX_VALUE
+
+        for (start in 0..maxOf(0, tLen - 1)) {
+            val end = minOf(start + windowSize, tLen)
+            val dist = levenshteinDistance(p, t.substring(start, end))
+            if (dist <= maxErrors) {
+                val score = dist.toDouble() / pLen.toDouble()
+                if (score < bestScore) bestScore = score
+            }
+            if (bestScore == 0.0) break
+        }
+
+        return if (bestScore <= 0.4) bestScore else null
+    }
+
+    /**
+     * Space-optimised Levenshtein distance — O(min(m,n)) space.
+     */
+    private fun levenshteinDistance(s: String, t: String): Int {
+        val m = s.length; val n = t.length
+        if (m == 0) return n
+        if (n == 0) return m
+        val dp = IntArray(n + 1) { it }
+        for (i in 1..m) {
+            var prev = dp[0]; dp[0] = i
+            for (j in 1..n) {
+                val temp = dp[j]
+                dp[j] = if (s[i - 1] == t[j - 1]) prev
+                         else 1 + minOf(prev, dp[j], dp[j - 1])
+                prev = temp
+            }
+        }
+        return dp[n]
+    }
 
     // ─── Internal ─────────────────────────────────────────────────────────────
 

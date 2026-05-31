@@ -75,7 +75,8 @@ export function search(
   initializeFuseInstances();
 
   const trimmedQuery = query.trim();
-  const results: Array<SearchResult & { score?: number }> = [];
+  type ScoredResult = SearchResult & { score?: number };
+  const results: ScoredResult[] = [];
 
   // Define search functions with type guards
   const searchFunctions = [
@@ -116,11 +117,14 @@ export function search(
     if (enabled) {
       const searchResults = fuse.search(trimmedQuery, { limit: limit * 2 }); // Get more results for better sorting
       results.push(
-        ...searchResults.map((result) => ({
-          type,
-          item: result.item,
-          score: result.score,
-        }))
+        ...searchResults.map(
+          (result) =>
+            ({
+              type,
+              item: result.item,
+              score: result.score,
+            }) as ScoredResult
+        )
       );
     }
   }

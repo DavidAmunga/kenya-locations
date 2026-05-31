@@ -14,6 +14,7 @@ jobs:
     outputs:
       data: ${{ steps.filter.outputs.data }}
       js: ${{ steps.filter.outputs.js }}
+      react: ${{ steps.filter.outputs.react }}
       kotlin: ${{ steps.filter.outputs.kotlin }}
       swift: ${{ steps.filter.outputs.swift }}
     steps:
@@ -27,6 +28,9 @@ jobs:
             js:
               - 'packages/js/**'
               - 'data/**'
+            react:
+              - 'packages/react/**'
+              - 'packages/js/**'
             kotlin:
               - 'packages/kotlin/**'
               - 'data/**'
@@ -73,6 +77,27 @@ jobs:
           name: js-dist
           path: packages/js/dist/
           retention-days: 7
+
+  # ── React package ─────────────────────────────────────────────────────────
+  ci-react:
+    name: React — Lint, Build & Test
+    needs: changes
+    if: needs.changes.outputs.react == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/react
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm test
 
   # ── Kotlin package ────────────────────────────────────────────────────────
   ci-kotlin:

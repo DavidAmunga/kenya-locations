@@ -5,7 +5,10 @@ import {
   getWardByName,
   getWardsInCounty,
   getCountyOfWard,
+  getConstituencyOfWard,
+  getSubCountyOfWard,
 } from "../wards";
+import { ConstituencyWrapper } from "../constituencies";
 
 describe("Wards Module", () => {
   describe("getWards", () => {
@@ -64,6 +67,37 @@ describe("Wards Module", () => {
 
     it("returns undefined for unknown ward", () => {
       expect(getCountyOfWard("NonExistentWard")).toBeUndefined();
+    });
+  });
+
+  describe("getConstituencyOfWard", () => {
+    it("returns ConstituencyWrapper for a ward code", () => {
+      const ward = getWards()[0];
+      const c = getConstituencyOfWard(ward.code);
+      expect(c).toBeInstanceOf(ConstituencyWrapper);
+      expect(c?.name).toBe(ward.constituency);
+    });
+
+    it("returns ConstituencyWrapper for a ward name", () => {
+      const ward = getWards()[0];
+      const c = getConstituencyOfWard(ward.name);
+      expect(c).toBeDefined();
+    });
+
+    it("returns undefined for unknown ward", () => {
+      expect(getConstituencyOfWard("NonExistent")).toBeUndefined();
+    });
+  });
+
+  describe("getSubCountyOfWard", () => {
+    it("returns sub-county for a ward code", () => {
+      const ward = getWards()[0];
+      const sc = getSubCountyOfWard(ward.code);
+      expect(sc).toBeDefined();
+    });
+
+    it("returns undefined for unknown ward", () => {
+      expect(getSubCountyOfWard("NonExistent")).toBeUndefined();
     });
   });
 });

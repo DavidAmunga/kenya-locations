@@ -1,15 +1,24 @@
 import { DATA_VERSION } from "../version";
 import {
   getCounties,
+  getCountyByName,
   county,
   getConstituencies,
   getConstituencyByCode,
+  getConstituencyByName,
+  getConstituenciesInCounty,
   getWards,
+  getWardByCode,
+  getWardByName,
   getWardsInCounty,
   getWardsInSubCounty,
   getCountyOfWard,
+  getConstituencyOfWard,
+  getSubCountyOfWard,
   search,
   getSubCounties,
+  getSubCountyByCode,
+  getSubCountyByName,
   getSubCountiesInCounty,
   getCountyOfSubCounty,
   getLocalities,
@@ -17,6 +26,7 @@ import {
   getLocalityByName,
   getLocalitiesByName,
   getAreaByName,
+  getAreasByName,
   getLocalitiesInCounty,
   getAreasInLocality,
   getAreasInCounty,
@@ -345,6 +355,163 @@ describe("KenyaLocations - Main API", () => {
           (r) => r.type === "county"
         )
       ).toBe(true);
+    });
+
+    it("discriminated union narrows item type correctly", () => {
+      const results = search("Nairobi", { limit: 20 });
+      for (const result of results) {
+        if (result.type === "county") {
+          expect(result.item).toHaveProperty("code");
+          expect(result.item).toHaveProperty("name");
+        } else if (result.type === "ward") {
+          expect(result.item).toHaveProperty("constituency");
+        } else if (result.type === "sub-county") {
+          expect(result.item).toHaveProperty("county");
+        }
+      }
+    });
+  });
+
+  describe("getCountyByName", () => {
+    it("returns county by name case-insensitively", () => {
+      expect(getCountyByName("nairobi")?.name).toBe("Nairobi");
+      expect(getCountyByName("MOMBASA")?.name).toBe("Mombasa");
+    });
+
+    it("returns undefined for unknown name", () => {
+      expect(getCountyByName("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getConstituencyByName", () => {
+    it("returns ConstituencyWrapper by name case-insensitively", () => {
+      const w = getConstituencyByName("westlands");
+      expect(w?.name).toBe("Westlands");
+      expect(w?.county).toBe("Nairobi");
+    });
+
+    it("returns undefined for unknown name", () => {
+      expect(getConstituencyByName("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getConstituenciesInCounty", () => {
+    it("returns constituencies by county name", () => {
+      const results = getConstituenciesInCounty("Nairobi");
+      expect(results.length).toBeGreaterThan(0);
+      results.forEach((c) => expect(c.county).toBe("Nairobi"));
+    });
+
+    it("returns constituencies by county code", () => {
+      const results = getConstituenciesInCounty("047");
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("returns empty array for unknown county", () => {
+      expect(getConstituenciesInCounty("Nowhere")).toEqual([]);
+    });
+
+    it("each result is a ConstituencyWrapper with wards()", () => {
+      const results = getConstituenciesInCounty("Nairobi");
+      expect(results[0].wards().length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("getWardByCode", () => {
+    it("returns ward by code", () => {
+      const first = getWards()[0];
+      expect(getWardByCode(first.code)?.code).toBe(first.code);
+    });
+
+    it("returns undefined for unknown code", () => {
+      expect(getWardByCode("99999")).toBeUndefined();
+    });
+  });
+
+  describe("getWardByName", () => {
+    it("returns ward by name case-insensitively", () => {
+      const first = getWards()[0];
+      expect(getWardByName(first.name.toLowerCase())?.name).toBe(first.name);
+    });
+
+    it("returns undefined for unknown name", () => {
+      expect(getWardByName("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getConstituencyOfWard", () => {
+    it("returns the constituency a ward belongs to by code", () => {
+      const ward = getWards()[0];
+      const constituency = getConstituencyOfWard(ward.code);
+      expect(constituency?.name).toBe(ward.constituency);
+    });
+
+    it("returns the constituency by ward name", () => {
+      const ward = getWards()[0];
+      const constituency = getConstituencyOfWard(ward.name);
+      expect(constituency?.name).toBe(ward.constituency);
+    });
+
+    it("returns undefined for unknown ward", () => {
+      expect(getConstituencyOfWard("NonExistent")).toBeUndefined();
+    });
+  });
+
+  describe("getSubCountyOfWard", () => {
+    it("returns the sub-county a ward belongs to", () => {
+      const ward = getWards()[0];
+      const sc = getSubCountyOfWard(ward.code);
+      expect(sc).toBeDefined();
+    });
+
+    it("returns undefined for unknown ward", () => {
+      expect(getSubCountyOfWard("NonExistent")).toBeUndefined();
+    });
+  });
+
+  describe("getSubCountyByCode", () => {
+    it("returns sub-county by code", () => {
+      const first = getSubCounties()[0];
+      expect(getSubCountyByCode(first.code)?.code).toBe(first.code);
+    });
+
+    it("returns undefined for unknown code", () => {
+      expect(getSubCountyByCode("99999")).toBeUndefined();
+    });
+  });
+
+  describe("getSubCountyByName", () => {
+    it("returns sub-county by name case-insensitively", () => {
+      const first = getSubCounties()[0];
+      expect(getSubCountyByName(first.name.toLowerCase())?.name).toBe(
+        first.name
+      );
+    });
+
+    it("returns undefined for unknown name", () => {
+      expect(getSubCountyByName("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getAreasByName", () => {
+    it("returns all areas matching a known name", () => {
+      const first = getAreas()[0];
+      const all = getAreasByName(first.name);
+      expect(all.length).toBeGreaterThan(0);
+      all.forEach((a) =>
+        expect(a.name.toLowerCase()).toBe(first.name.toLowerCase())
+      );
+    });
+
+    it("is case-insensitive", () => {
+      const first = getAreas()[0];
+      const lower = getAreasByName(first.name.toLowerCase());
+      const upper = getAreasByName(first.name.toUpperCase());
+      expect(lower.length).toBe(upper.length);
+    });
+
+    it("returns empty array for unknown name", () => {
+      expect(getAreasByName("NonExistentArea12345")).toEqual([]);
     });
   });
 });

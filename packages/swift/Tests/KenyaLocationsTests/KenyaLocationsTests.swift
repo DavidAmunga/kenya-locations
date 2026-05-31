@@ -92,4 +92,60 @@ final class KenyaLocationsTests: XCTestCase {
         let decoded = try JSONDecoder().decode([County].self, from: encoded)
         XCTAssertEqual(counties, decoded)
     }
+
+    // ─── Fuzzy search ─────────────────────────────────────────────────────────
+
+    func testSearchExactMatchReturnsCounty() {
+        let results = KenyaLocations.shared.search("Nairobi")
+        XCTAssertFalse(results.isEmpty, "Search for 'Nairobi' should return results")
+        let hasNairobi = results.contains { r in
+            if case .county(let c) = r { return c.name == "Nairobi" }
+            return false
+        }
+        XCTAssertTrue(hasNairobi, "Search for 'Nairobi' should include the Nairobi county")
+    }
+
+    func testSearchToleratesTypos() {
+        let results = KenyaLocations.shared.search("Nairob")
+        XCTAssertFalse(results.isEmpty, "Typo 'Nairob' should fuzzy-match 'Nairobi'")
+        let hasNairobi = results.contains { r in
+            if case .county(let c) = r { return c.name == "Nairobi" }
+            return false
+        }
+        XCTAssertTrue(hasNairobi, "Fuzzy search for 'Nairob' should include Nairobi county")
+    }
+
+    func testSearchReturnsEmptyForSingleCharacter() {
+        let results = KenyaLocations.shared.search("N")
+        XCTAssertTrue(results.isEmpty, "Single character queries should return no results")
+    }
+
+    func testSearchRespectsLimit() {
+        let results = KenyaLocations.shared.search("a", limit: 5)
+        XCTAssertLessThanOrEqual(results.count, 5, "Search should respect the limit parameter")
+    }
+
+    func testSearchResultsSortedBestFirst() {
+        let results = KenyaLocations.shared.search("Westlands")
+        XCTAssertFalse(results.isEmpty, "Search for 'Westlands' should return results")
+        // First result should contain "Westlands" (exact substring before fuzzy matches)
+        let firstName: String = {
+            switch results[0] {
+            case .county(let c):       return c.name
+            case .constituency(let c): return c.name
+            case .subCounty(let s):    return s.name
+            case .ward(let w):         return w.name
+            case .locality(let l):     return l.name
+            case .area(let a):         return a.name
+            }
+        }()
+        XCTAssertTrue(firstName.lowercased().contains("westlands"),
+                      "First result should contain 'Westlands', got '\(firstName)'")
+    }
+
+    func testSearchByTypeFiltersCorrectly() {
+        let results = KenyaLocations.shared.searchByType("Nairobi", type: .county)
+        XCTAssertTrue(results.allSatisfy { $0.type == .county },
+                      "searchByType(.county) should only return county results")
+    }
 }

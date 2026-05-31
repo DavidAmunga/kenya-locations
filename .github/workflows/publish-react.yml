@@ -1,0 +1,57 @@
+name: Publish React to npm
+
+on:
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish:
+    name: Build & Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    defaults:
+      run:
+        working-directory: packages/react
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm test
+
+      - name: Get package version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish to npm
+        working-directory: ${{ github.workspace }}
+        run: pnpm changeset publish --filter kenya-locations-react
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+
+      - name: Publish GitHub draft release
+        run: |
+          gh release edit "kenya-locations-react@${{ steps.version.outputs.version }}" --draft=false || true
+          echo "## Published kenya-locations-react@${{ steps.version.outputs.version }} to npm" >> $GITHUB_STEP_SUMMARY
+          echo "- [npm](https://www.npmjs.com/package/kenya-locations-react)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/kenya-locations-react@${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

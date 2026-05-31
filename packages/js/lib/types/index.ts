@@ -1,9 +1,32 @@
 /**
+ * Former Kenyan province a county belongs to.
+ */
+export type CountyRegion =
+  | "Nairobi"
+  | "Central"
+  | "Coast"
+  | "Eastern"
+  | "North Eastern"
+  | "Nyanza"
+  | "Rift Valley"
+  | "Western";
+
+/**
  * Interface for County data
  */
 export interface County {
   code: string;
   name: string;
+  /** County headquarters / capital town */
+  capital: string;
+  /** Area in square kilometres (KNBS) */
+  area_km2: number;
+  /** Population from the 2019 Kenya Population and Housing Census (KNBS) */
+  population_2019: number;
+  /** Former province this county belongs to */
+  region: CountyRegion;
+  /** Kenya Post primary postal code for the county capital */
+  postal_code: string;
 }
 
 /**
@@ -51,12 +74,25 @@ export interface Area {
 }
 
 /**
- * Search result interface
+ * Search result
+ * @example
+ * ```ts
+ * for (const result of search('Nairobi')) {
+ *   if (result.type === 'county') {
+ *     console.log(result.item.code); // County
+ *   } else if (result.type === 'ward') {
+ *     console.log(result.item.constituency); // Ward
+ *   }
+ * }
+ * ```
  */
-export interface SearchResult {
-  type: "county" | "constituency" | "ward" | "sub-county" | "locality" | "area";
-  item: County | Constituency | Ward | SubCounty | Locality | Area;
-}
+export type SearchResult =
+  | { type: "county"; item: County }
+  | { type: "constituency"; item: Constituency }
+  | { type: "ward"; item: Ward }
+  | { type: "sub-county"; item: SubCounty }
+  | { type: "locality"; item: Locality }
+  | { type: "area"; item: Area };
 
 /**
  * Available search types

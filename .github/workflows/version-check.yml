@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "packages/js/package.json"
+      - "packages/react/package.json"
 
 jobs:
   check-version:
@@ -24,24 +25,33 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Check if version was bumped
+      - name: Check JS version bump
         run: |
           # Read versions directly from git objects — no working-tree changes needed,
           # and works correctly in detached HEAD (PR merge ref) state.
-          PR_VERSION=$(git show HEAD:packages/js/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
-          MAIN_VERSION=$(git show origin/main:packages/js/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          if git show HEAD:packages/js/package.json &>/dev/null && git show origin/main:packages/js/package.json &>/dev/null; then
+            PR_VERSION=$(git show HEAD:packages/js/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+            MAIN_VERSION=$(git show origin/main:packages/js/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+            echo "kenya-locations — Main: $MAIN_VERSION  PR: $PR_VERSION"
+            if [ "$PR_VERSION" == "$MAIN_VERSION" ]; then
+              echo "⚠️ **kenya-locations**: version not bumped (current: \`$PR_VERSION\`). This is expected with changesets — the 'Version Packages' PR will handle it." >> $GITHUB_STEP_SUMMARY
+              echo "Did you create a changeset? Run: \`pnpm changeset\`" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ **kenya-locations**: bumped from \`$MAIN_VERSION\` → \`$PR_VERSION\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
 
-          echo "Main branch version: $MAIN_VERSION"
-          echo "PR branch version: $PR_VERSION"
-
-          if [ "$PR_VERSION" == "$MAIN_VERSION" ]; then
-            echo "⚠️ Warning: Version in package.json was not bumped!" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Current version: \`$PR_VERSION\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "This is expected if you're using changesets. The version will be bumped automatically in the 'Version Packages' PR." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Did you create a changeset? Run: \`pnpm changeset\`" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ Version bumped from $MAIN_VERSION to $PR_VERSION" >> $GITHUB_STEP_SUMMARY
+      - name: Check React version bump
+        run: |
+          if git show HEAD:packages/react/package.json &>/dev/null && git show origin/main:packages/react/package.json &>/dev/null; then
+            PR_VERSION=$(git show HEAD:packages/react/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+            MAIN_VERSION=$(git show origin/main:packages/react/package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+            echo "kenya-locations-react — Main: $MAIN_VERSION  PR: $PR_VERSION"
+            if [ "$PR_VERSION" == "$MAIN_VERSION" ]; then
+              echo "⚠️ **kenya-locations-react**: version not bumped (current: \`$PR_VERSION\`). Did you create a changeset? Run: \`pnpm changeset\`" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ **kenya-locations-react**: bumped from \`$MAIN_VERSION\` → \`$PR_VERSION\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          elif git show HEAD:packages/react/package.json &>/dev/null; then
+            echo "ℹ️ **kenya-locations-react**: new package — no prior version on main." >> $GITHUB_STEP_SUMMARY
           fi

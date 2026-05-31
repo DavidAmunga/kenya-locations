@@ -58,4 +58,65 @@ class KenyaLocationsTest {
         val invalid = areas.filter { it.locality !in localities }
         assertTrue(invalid.isEmpty(), "All area locality refs must be valid. Invalid: ${invalid.take(5)}")
     }
+
+    // ─── Fuzzy search ────────────────────────────────────────────────────────
+
+    @Test
+    fun `search exact match returns county`() {
+        val results = KenyaLocations.search("Nairobi")
+        assertTrue(results.isNotEmpty(), "Search for 'Nairobi' should return results")
+        assertTrue(
+            results.any { it.type == SearchType.COUNTY && (it.item as? County)?.name == "Nairobi" },
+            "First result for 'Nairobi' should be the Nairobi county"
+        )
+    }
+
+    @Test
+    fun `search tolerates typos`() {
+        val results = KenyaLocations.search("Nairob")
+        assertTrue(results.isNotEmpty(), "Typo 'Nairob' should fuzzy-match 'Nairobi'")
+        assertTrue(
+            results.any { (it.item as? County)?.name == "Nairobi" },
+            "Fuzzy search for 'Nairob' should include Nairobi county"
+        )
+    }
+
+    @Test
+    fun `search returns empty for single character`() {
+        val results = KenyaLocations.search("N")
+        assertTrue(results.isEmpty(), "Single character queries should return no results")
+    }
+
+    @Test
+    fun `search respects limit`() {
+        val results = KenyaLocations.search("a", limit = 5)
+        assertTrue(results.size <= 5, "Search should respect the limit parameter")
+    }
+
+    @Test
+    fun `search results are sorted best match first`() {
+        val results = KenyaLocations.search("Westlands")
+        assertTrue(results.isNotEmpty(), "Search for 'Westlands' should return results")
+        // All exact substring matches (score 0.0) must come before fuzzy matches.
+        // Just verify the very first result name contains "Westlands".
+        val firstName: String = when (val item = results.first().item) {
+            is County -> item.name
+            is Constituency -> item.name
+            is SubCounty -> item.name
+            is Ward -> item.name
+            is Locality -> item.name
+            is Area -> item.name
+            else -> ""
+        }
+        assertTrue(
+            firstName.contains("Westlands", ignoreCase = true),
+            "First result should contain 'Westlands', got '$firstName'"
+        )
+    }
+
+    @Test
+    fun `searchByType filters to requested type`() {
+        val results = KenyaLocations.searchByType("Nairobi", SearchType.COUNTY)
+        assertTrue(results.all { it.type == SearchType.COUNTY }, "searchByType should only return the requested type")
+    }
 }

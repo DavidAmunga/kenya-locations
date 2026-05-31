@@ -2,11 +2,13 @@
  * Tree-shakeable exports for ward-related functions
  */
 
-import type { Ward, County } from "./types";
+import type { Ward, County, SubCounty } from "./types";
 import { wards } from "./data/wards";
 import { counties } from "./data/counties";
 import { constituencies } from "./data/constituencies";
+import { subCounties } from "./data/sub-counties";
 import { buildLookupMap, buildGroupMap } from "./utils/maps";
+import { ConstituencyWrapper } from "./constituencies";
 
 // --- Lookup Maps ---
 const wardCodeMap = buildLookupMap(wards, (w) => w.code);
@@ -15,6 +17,9 @@ const countyCodeMap = buildLookupMap(counties, (c) => c.code);
 const countyNameMap = buildLookupMap(counties, (c) => c.name.toLowerCase());
 const constituencyNameMap = buildLookupMap(constituencies, (c) =>
   c.name.toLowerCase()
+);
+const subCountyNameMap = buildLookupMap(subCounties, (sc) =>
+  sc.name.toLowerCase()
 );
 
 // --- Relationship Maps ---
@@ -116,6 +121,48 @@ export function getCountyOfWard(wardNameOrCode: string): County | undefined {
 
   const countyCode = constituencyToCountyCodeMap.get(ward.constituency);
   return countyCode ? countyCodeMap.get(countyCode) : undefined;
+}
+
+/**
+ * Get the constituency a ward belongs to by ward name or code
+ * @param wardNameOrCode Ward name or code
+ * @returns ConstituencyWrapper or undefined if not found
+ * @example
+ * ```ts
+ * import { getConstituencyOfWard } from 'kenya-locations/wards';
+ * const constituency = getConstituencyOfWard('0001');
+ * ```
+ */
+export function getConstituencyOfWard(
+  wardNameOrCode: string
+): ConstituencyWrapper | undefined {
+  const ward =
+    wardCodeMap.get(wardNameOrCode) ??
+    wardNameMap.get(wardNameOrCode.toLowerCase());
+  if (!ward) return undefined;
+  const found = constituencyNameMap.get(ward.constituency.toLowerCase());
+  return found ? new ConstituencyWrapper(found) : undefined;
+}
+
+/**
+ * Get the sub-county a ward belongs to by ward name or code.
+ * Sub-county names correspond to constituency names in the ward dataset.
+ * @param wardNameOrCode Ward name or code
+ * @returns SubCounty or undefined if not found
+ * @example
+ * ```ts
+ * import { getSubCountyOfWard } from 'kenya-locations/wards';
+ * const subCounty = getSubCountyOfWard('0001');
+ * ```
+ */
+export function getSubCountyOfWard(
+  wardNameOrCode: string
+): SubCounty | undefined {
+  const ward =
+    wardCodeMap.get(wardNameOrCode) ??
+    wardNameMap.get(wardNameOrCode.toLowerCase());
+  if (!ward) return undefined;
+  return subCountyNameMap.get(ward.constituency.toLowerCase());
 }
 
 // Export types

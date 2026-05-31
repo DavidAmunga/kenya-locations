@@ -10,6 +10,7 @@ import { buildLookupMap, buildGroupMap } from "./utils/maps";
 
 // --- Lookup Maps ---
 const areaNameMap = buildLookupMap(areas, (a) => a.name.toLowerCase());
+const areasByNameMap = buildGroupMap(areas, (a) => a.name.toLowerCase());
 const localityNameMap = buildLookupMap(localities, (l) => l.name.toLowerCase());
 const countyNameMap = buildLookupMap(counties, (c) => c.name.toLowerCase());
 
@@ -102,6 +103,21 @@ export function getLocalityOfArea(areaName: string): Locality | undefined {
   const area = areaNameMap.get(areaName.toLowerCase());
   if (!area) return undefined;
   return localityNameMap.get(area.locality.toLowerCase());
+}
+
+/**
+ * Get all areas matching a name across all localities.
+ * Useful when the same area name exists in more than one locality.
+ * @param name Area name (case-insensitive)
+ * @returns Array of Area objects
+ * @example
+ * ```ts
+ * import { getAreasByName } from 'kenya-locations/areas';
+ * const allTown = getAreasByName('Town');
+ * ```
+ */
+export function getAreasByName(name: string): Area[] {
+  return areasByNameMap.get(name.toLowerCase()) ?? [];
 }
 
 // Export types
