@@ -80,28 +80,93 @@ public final class KenyaLocations: @unchecked Sendable {
 
     // ─── Search ───────────────────────────────────────────────────────────────
 
-    /// Case-insensitive substring search across all entity types.
+    /// Fuzzy search across all entity types using a Levenshtein sliding-window algorithm,
+    /// mirroring the Fuse.js behaviour used on the JS platform (effective threshold ≈ 0.4).
+    /// Tolerates minor typos — e.g. "Nairob" matches "Nairobi".
+    /// Results are sorted by relevance score (best match first).
     /// Returns up to `limit` results (default 20).
-    ///
-    /// - Note: This currently uses substring matching. To align with the JS
-    ///   platform (Fuse.js Bitap, threshold 0.2), replace this body with the
-    ///   `Ifrit` package (https://github.com/ukushu/Ifrit) using the same
-    ///   threshold and `keys: ["name"]` configuration.
-    ///   See TODO(search-parity) in KenyaLocations.kt for the Kotlin equivalent.
     public func search(_ query: String, limit: Int = 20) -> [SearchResult] {
-        let q = query.lowercased()
-        var results: [SearchResult] = []
-        counties.filter { $0.name.lowercased().contains(q) }.forEach { results.append(.county($0)) }
-        subCounties.filter { $0.name.lowercased().contains(q) }.forEach { results.append(.subCounty($0)) }
-        constituencies.filter { $0.name.lowercased().contains(q) }.forEach { results.append(.constituency($0)) }
-        wards.filter { $0.name.lowercased().contains(q) }.forEach { results.append(.ward($0)) }
-        localities.filter { $0.name.lowercased().contains(q) }.forEach { results.append(.locality($0)) }
-        areas.filter { $0.name.lowercased().contains(q) }.forEach { results.append(.area($0)) }
-        return Array(results.prefix(limit))
+        let q = query.trimmingCharacters(in: .whitespaces)
+        guard q.count >= 2 else { return [] }
+
+        var scored: [(score: Double, result: SearchResult)] = []
+
+        func collect<T>(_ items: [T], make: (T) -> SearchResult, name: (T) -> String) {
+            for item in items {
+                guard let score = fuzzyScore(pattern: q, text: name(item)) else { continue }
+                scored.append((score, make(item)))
+            }
+        }
+
+        collect(counties,       make: { .county($0) })       { $0.name }
+        collect(subCounties,    make: { .subCounty($0) })    { $0.name }
+        collect(constituencies, make: { .constituency($0) }) { $0.name }
+        collect(wards,          make: { .ward($0) })          { $0.name }
+        collect(localities,     make: { .locality($0) })     { $0.name }
+        collect(areas,          make: { .area($0) })          { $0.name }
+
+        return scored.sorted { $0.score < $1.score }.prefix(limit).map { $0.result }
     }
 
     public func searchByType(_ query: String, type: SearchType, limit: Int = 20) -> [SearchResult] {
         search(query, limit: limit * 6).filter { $0.type == type }.prefix(limit).map { $0 }
+    }
+
+    // ─── Fuzzy matching ───────────────────────────────────────────────────────
+
+    /// Returns a relevance score in [0.0, 1.0) for `pattern` against `text`, or nil if
+    /// no fuzzy match exists. Score 0.0 = exact substring (perfect). Higher = worse match.
+    ///
+    /// Algorithm: exact substring check first; then Levenshtein sliding-window with
+    /// maxErrors = max(1, floor(patternLen × 0.4)). Returns a score only when the best
+    /// window score ≤ 0.4, matching Fuse.js effective threshold behaviour.
+    private func fuzzyScore(pattern: String, text: String) -> Double? {
+        let p = pattern.lowercased()
+        let t = text.lowercased()
+
+        if t.contains(p) { return 0.0 }
+        guard p.count >= 2 else { return nil }
+
+        let pChars = Array(p)
+        let tChars = Array(t)
+        let pLen   = pChars.count
+        let tLen   = tChars.count
+        let maxErrors  = max(1, Int(Double(pLen) * 0.4))
+        let windowSize = pLen + maxErrors
+
+        var bestScore = Double.greatestFiniteMagnitude
+
+        var start = 0
+        while start < tLen {
+            let end    = min(start + windowSize, tLen)
+            let window = Array(tChars[start..<end])
+            let dist   = levenshteinDistance(pChars, window)
+            if dist <= maxErrors {
+                let score = Double(dist) / Double(pLen)
+                if score < bestScore { bestScore = score }
+            }
+            if bestScore == 0.0 { break }
+            start += 1
+        }
+
+        return bestScore <= 0.4 ? bestScore : nil
+    }
+
+    /// Space-optimised Levenshtein distance — O(n) space.
+    private func levenshteinDistance(_ s: [Character], _ t: [Character]) -> Int {
+        let m = s.count, n = t.count
+        if m == 0 { return n }
+        if n == 0 { return m }
+        var dp = Array(0...n)
+        for i in 1...m {
+            var prev = dp[0]; dp[0] = i
+            for j in 1...n {
+                let temp = dp[j]
+                dp[j] = s[i - 1] == t[j - 1] ? prev : 1 + min(prev, min(dp[j], dp[j - 1]))
+                prev = temp
+            }
+        }
+        return dp[n]
     }
 
     // ─── Thread-safe lazy accessors ───────────────────────────────────────────
