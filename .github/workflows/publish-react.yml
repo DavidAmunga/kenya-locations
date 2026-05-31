@@ -45,8 +45,8 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Publish to npm
-        working-directory: ${{ github.workspace }}
-        run: pnpm changeset publish --filter kenya-locations-react
+        working-directory: packages/react
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
