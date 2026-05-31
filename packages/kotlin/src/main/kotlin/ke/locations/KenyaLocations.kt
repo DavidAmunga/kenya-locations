@@ -96,6 +96,11 @@ object KenyaLocations {
     fun search(query: String, limit: Int = 20): List<SearchResult<*>> {
         val q = query.lowercase()
         return buildList {
+            // TODO(search-parity): replace this substring match with fuse-kt
+            // (io.github.neilsayok:fuse-kt-jvm) to align with Fuse.js on the JS
+            // platform. Config to mirror: threshold=0.2, keys=["name"],
+            // ignoreLocation=true, minMatchCharLength=2.
+            // See: https://github.com/neilsayok/fuse-kt
             _counties.filter { it.name.lowercase().contains(q) }
                 .forEach { add(SearchResult(SearchType.COUNTY, it)) }
             _subCounties.filter { it.name.lowercase().contains(q) }

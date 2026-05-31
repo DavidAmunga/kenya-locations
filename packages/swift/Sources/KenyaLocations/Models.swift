@@ -1,8 +1,29 @@
 import Foundation
 
+public enum CountyRegion: String, Codable, Equatable, Hashable, CaseIterable, Sendable {
+    case nairobi = "Nairobi"
+    case central = "Central"
+    case coast = "Coast"
+    case eastern = "Eastern"
+    case northEastern = "North Eastern"
+    case nyanza = "Nyanza"
+    case riftValley = "Rift Valley"
+    case western = "Western"
+}
+
 public struct County: Codable, Equatable, Hashable, Sendable {
     public let code: String
     public let name: String
+    /// County headquarters / capital town
+    public let capital: String
+    /// Area in square kilometres (KNBS)
+    public let area_km2: Double
+    /// Population from the 2019 Kenya Population and Housing Census (KNBS)
+    public let population_2019: Int
+    /// Former province this county belongs to
+    public let region: CountyRegion
+    /// Kenya Post primary postal code for the county capital
+    public let postal_code: String
 }
 
 public struct SubCounty: Codable, Equatable, Hashable, Sendable {

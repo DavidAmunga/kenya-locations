@@ -6,6 +6,8 @@ import {
   county,
   CountyWrapper,
 } from "../counties";
+import { ConstituencyWrapper } from "../constituencies";
+import { LocalityWrapper } from "../localities";
 import { LocationNotFoundError } from "../errors/LocationErrors";
 
 describe("Counties Module", () => {
@@ -73,9 +75,15 @@ describe("Counties Module", () => {
       westlandsAreas.forEach((a) => expect(a.locality).toBe("Westlands"));
     });
 
-    it("exposes data getter as a plain object copy", () => {
+    it("exposes data getter as a plain object copy with enriched fields", () => {
       const nairobi = county("Nairobi")!;
-      expect(nairobi.data).toEqual({ code: "047", name: "Nairobi" });
+      expect(nairobi.data.code).toBe("047");
+      expect(nairobi.data.name).toBe("Nairobi");
+      expect(nairobi.data.capital).toBe("Nairobi");
+      expect(nairobi.data.region).toBe("Nairobi");
+      expect(nairobi.data.population_2019).toBeGreaterThan(0);
+      expect(nairobi.data.area_km2).toBeGreaterThan(0);
+      expect(nairobi.data.postal_code).toBe("00100");
     });
 
     it("returns a constituency by name", () => {
@@ -108,6 +116,36 @@ describe("Counties Module", () => {
     it("throws LocationNotFoundError for unknown locality", () => {
       const nairobi = county("Nairobi")!;
       expect(() => nairobi.locality("Nowhere")).toThrow(LocationNotFoundError);
+    });
+
+    it("constituencies() returns ConstituencyWrapper instances", () => {
+      const nairobi = county("Nairobi")!;
+      const cs = nairobi.constituencies();
+      expect(cs[0]).toBeInstanceOf(ConstituencyWrapper);
+      expect(cs[0].wards().length).toBeGreaterThan(0);
+    });
+
+    it("constituency() returns a ConstituencyWrapper", () => {
+      const nairobi = county("Nairobi")!;
+      const w = nairobi.constituency("Westlands");
+      expect(w).toBeInstanceOf(ConstituencyWrapper);
+      expect(w.wards().length).toBeGreaterThan(0);
+    });
+
+    it("localities() returns LocalityWrapper instances", () => {
+      const nairobi = county("Nairobi")!;
+      const ls = nairobi.localities();
+      expect(ls[0]).toBeInstanceOf(LocalityWrapper);
+      // Use Westlands which is known to have areas
+      const westlands = ls.find((l) => l.name === "Westlands")!;
+      expect(westlands.areas().length).toBeGreaterThan(0);
+    });
+
+    it("locality() returns a LocalityWrapper", () => {
+      const nairobi = county("Nairobi")!;
+      const w = nairobi.locality("Westlands");
+      expect(w).toBeInstanceOf(LocalityWrapper);
+      expect(w.areas().length).toBeGreaterThan(0);
     });
   });
 });

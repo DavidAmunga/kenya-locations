@@ -1,4 +1,4 @@
 import type { County } from "../types";
 import raw from "../../../../data/counties.json";
 
-export const counties: County[] = raw;
+export const counties: County[] = raw as County[];

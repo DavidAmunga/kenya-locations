@@ -29,5 +29,5 @@ export default defineConfig({
     },
     copyPublicDir: false,
   },
-  plugins: [dts({ include: ["lib"] })],
+  plugins: [dts({ include: ["lib"], entryRoot: "lib" })],
 });

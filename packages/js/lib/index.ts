@@ -1,38 +1,56 @@
 export {
   KenyaLocations,
+  // County
   getCounties,
-  getSubCounties,
-  getWards,
   getCountyByCode,
-  getSubCountiesInCounty,
-  getWardsInSubCounty,
-  getCountyOfSubCounty,
-  getCountyOfWard,
+  getCountyByName,
   county,
+  CountyWrapper,
+  // Constituency
   getConstituencies,
   getConstituencyByCode,
-  getWardsInCounty,
-  search,
-  searchByType,
+  getConstituencyByName,
+  getConstituenciesInCounty,
   getWardsInConstituency,
   getCountyOfConstituency,
-  CountyWrapper,
   ConstituencyWrapper,
-  LocalityWrapper,
-  NotFoundError,
-  KenyaLocationsError,
+  // Ward
+  getWards,
+  getWardByCode,
+  getWardByName,
+  getWardsInCounty,
+  getWardsInSubCounty,
+  getCountyOfWard,
+  getConstituencyOfWard,
+  getSubCountyOfWard,
+  // Sub-county
+  getSubCounties,
+  getSubCountyByCode,
+  getSubCountyByName,
+  getSubCountiesInCounty,
+  getCountyOfSubCounty,
+  // Locality
   getLocalities,
-  getAreas,
   getLocalityByName,
   getLocalitiesByName,
-  getAreaByName,
   getLocalitiesInCounty,
-  getAreasInLocality,
-  getAreasInCounty,
   getCountyOfLocality,
-  getCountyOfArea,
   getLocalityOfArea,
   locality,
+  LocalityWrapper,
+  // Area
+  getAreas,
+  getAreaByName,
+  getAreasByName,
+  getAreasInLocality,
+  getAreasInCounty,
+  getCountyOfArea,
+  // Search
+  search,
+  searchByType,
+  // Errors (legacy aliases)
+  NotFoundError,
+  KenyaLocationsError,
 } from "./KenyaLocations";
 
 export { DATA_VERSION } from "./version";
@@ -49,6 +67,9 @@ export type {
 } from "./types";
 
 export { counties, constituencies, wards } from "./data";
+export { subCounties } from "./data/sub-counties";
+export { localities } from "./data/locality";
+export { areas } from "./data/area";
 
 export {
   LocationError,

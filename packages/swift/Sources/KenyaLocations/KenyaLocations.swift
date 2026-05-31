@@ -82,6 +82,12 @@ public final class KenyaLocations: @unchecked Sendable {
 
     /// Case-insensitive substring search across all entity types.
     /// Returns up to `limit` results (default 20).
+    ///
+    /// - Note: This currently uses substring matching. To align with the JS
+    ///   platform (Fuse.js Bitap, threshold 0.2), replace this body with the
+    ///   `Ifrit` package (https://github.com/ukushu/Ifrit) using the same
+    ///   threshold and `keys: ["name"]` configuration.
+    ///   See TODO(search-parity) in KenyaLocations.kt for the Kotlin equivalent.
     public func search(_ query: String, limit: Int = 20) -> [SearchResult] {
         let q = query.lowercased()
         var results: [SearchResult] = []

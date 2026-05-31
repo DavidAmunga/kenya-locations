@@ -247,6 +247,30 @@ function validateRequiredFields(data, type, fields) {
   }
 }
 
+const VALID_REGIONS = new Set([
+  "Nairobi",
+  "Central",
+  "Coast",
+  "Eastern",
+  "North Eastern",
+  "Nyanza",
+  "Rift Valley",
+  "Western",
+]);
+
+function validateCountyRegions(counties) {
+  const invalid = counties.filter((c) => !VALID_REGIONS.has(c.region));
+  if (invalid.length > 0) {
+    log("❌ Counties with invalid region values:", "red");
+    invalid.forEach((c) =>
+      log(`   - ${c.name}: "${c.region}"`, "red")
+    );
+    return false;
+  }
+  log("✅ All county region values are valid", "green");
+  return true;
+}
+
 function validateDataIntegrity() {
   log("🔍 Starting data validation...", "blue");
   log("", "reset");
@@ -259,6 +283,11 @@ function validateDataIntegrity() {
   allValid &= validateRequiredFields(data.counties, "counties", [
     "code",
     "name",
+    "capital",
+    "area_km2",
+    "population_2019",
+    "region",
+    "postal_code",
   ]);
   allValid &= validateRequiredFields(data.constituencies, "constituencies", [
     "code",
@@ -284,6 +313,11 @@ function validateDataIntegrity() {
     "locality",
     "county",
   ]);
+  log("", "reset");
+
+  // Validate county region values
+  log("📋 Checking county region values...", "yellow");
+  allValid &= validateCountyRegions(data.counties);
   log("", "reset");
 
   // Validate unique IDs

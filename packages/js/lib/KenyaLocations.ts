@@ -23,6 +23,7 @@ import { LocationError, LocationNotFoundError } from "./errors/LocationErrors";
 // --- Lookup Maps ---
 const countyCodeMap = buildLookupMap(counties, (c) => c.code);
 const countyNameMap = buildLookupMap(counties, (c) => c.name.toLowerCase());
+const areasByNameMap = buildGroupMap(areas, (a) => a.name.toLowerCase());
 const constituencyCodeMap = buildLookupMap(constituencies, (c) => c.code);
 const constituencyNameMap = buildLookupMap(constituencies, (c) =>
   c.name.toLowerCase()
@@ -604,6 +605,104 @@ export function getCountyOfConstituency(
 }
 
 /**
+ * Get a county by name (case-insensitive)
+ */
+export function getCountyByName(name: string): County | undefined {
+  return countyNameMap.get(name.toLowerCase());
+}
+
+/**
+ * Get a constituency by name (case-insensitive)
+ */
+export function getConstituencyByName(
+  name: string
+): ConstituencyWrapper | undefined {
+  const found = constituencyNameMap.get(name.toLowerCase());
+  return found ? new ConstituencyWrapper(found) : undefined;
+}
+
+/**
+ * Get a ward by code
+ */
+export function getWardByCode(code: string): Ward | undefined {
+  return wardCodeMap.get(code);
+}
+
+/**
+ * Get a ward by name (case-insensitive).
+ * Note: Multiple wards may share the same name across different constituencies.
+ */
+export function getWardByName(name: string): Ward | undefined {
+  return wardNameMap.get(name.toLowerCase());
+}
+
+/**
+ * Get a sub-county by code
+ */
+export function getSubCountyByCode(code: string): SubCounty | undefined {
+  return subCountyCodeMap.get(code);
+}
+
+/**
+ * Get a sub-county by name (case-insensitive)
+ */
+export function getSubCountyByName(name: string): SubCounty | undefined {
+  return subCountyNameMap.get(name.toLowerCase());
+}
+
+/**
+ * Get all constituencies in a county by county name or code
+ */
+export function getConstituenciesInCounty(
+  nameOrCode: string
+): ConstituencyWrapper[] {
+  const found =
+    countyCodeMap.get(nameOrCode) ??
+    countyNameMap.get(nameOrCode.toLowerCase());
+  if (!found) return [];
+  return (countyToConstituenciesMap.get(found.code) ?? []).map(
+    (c) => new ConstituencyWrapper(c)
+  );
+}
+
+/**
+ * Get the constituency a ward belongs to by ward name or code
+ */
+export function getConstituencyOfWard(
+  wardNameOrCode: string
+): ConstituencyWrapper | undefined {
+  const ward =
+    wardCodeMap.get(wardNameOrCode) ??
+    wardNameMap.get(wardNameOrCode.toLowerCase());
+  if (!ward) return undefined;
+  const found = constituencyNameMap.get(ward.constituency.toLowerCase());
+  return found ? new ConstituencyWrapper(found) : undefined;
+}
+
+/**
+ * Get the sub-county a ward belongs to by ward name or code.
+ * Sub-county names correspond to constituency names in the ward dataset.
+ */
+export function getSubCountyOfWard(
+  wardNameOrCode: string
+): SubCounty | undefined {
+  const ward =
+    wardCodeMap.get(wardNameOrCode) ??
+    wardNameMap.get(wardNameOrCode.toLowerCase());
+  if (!ward) return undefined;
+  return subCountyNameMap.get(ward.constituency.toLowerCase());
+}
+
+/**
+ * Get all areas matching a name across all localities.
+ * Useful when the same area name exists in more than one locality.
+ * @param name Area name (case-insensitive)
+ */
+export function getAreasByName(name: string): Area[] {
+  return areasByNameMap.get(name.toLowerCase()) ?? [];
+}
+
+/**
  * Main class for working with Kenya's administrative locations.
  *
  * @deprecated Use the tree-shakeable standalone functions instead.
@@ -647,7 +746,17 @@ export class KenyaLocations {
   public static locality = locality;
   public static getConstituencies = getConstituencies;
   public static getConstituencyByCode = getConstituencyByCode;
+  public static getConstituencyByName = getConstituencyByName;
+  public static getConstituenciesInCounty = getConstituenciesInCounty;
+  public static getConstituencyOfWard = getConstituencyOfWard;
+  public static getSubCountyOfWard = getSubCountyOfWard;
   public static getWardsInCounty = getWardsInCounty;
+  public static getWardByCode = getWardByCode;
+  public static getWardByName = getWardByName;
+  public static getSubCountyByCode = getSubCountyByCode;
+  public static getSubCountyByName = getSubCountyByName;
+  public static getCountyByName = getCountyByName;
+  public static getAreasByName = getAreasByName;
   public static search = search;
   public static searchByType = searchByType;
   public static getWardsInConstituency = getWardsInConstituency;

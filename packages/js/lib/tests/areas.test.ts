@@ -2,6 +2,7 @@ import { expect, it, describe } from "vitest";
 import {
   getAreas,
   getAreaByName,
+  getAreasByName,
   getAreasInLocality,
   getAreasInCounty,
   getCountyOfArea,
@@ -79,6 +80,28 @@ describe("Areas Module", () => {
 
     it("returns undefined for unknown area", () => {
       expect(getLocalityOfArea("Nowhere")).toBeUndefined();
+    });
+  });
+
+  describe("getAreasByName", () => {
+    it("returns all areas matching a known name", () => {
+      const first = getAreas()[0];
+      const results = getAreasByName(first.name);
+      expect(results.length).toBeGreaterThan(0);
+      results.forEach((a) =>
+        expect(a.name.toLowerCase()).toBe(first.name.toLowerCase())
+      );
+    });
+
+    it("is case-insensitive", () => {
+      const first = getAreas()[0];
+      const lower = getAreasByName(first.name.toLowerCase());
+      const upper = getAreasByName(first.name.toUpperCase());
+      expect(lower.length).toBe(upper.length);
+    });
+
+    it("returns empty array for unknown name", () => {
+      expect(getAreasByName("NonExistentArea12345")).toEqual([]);
     });
   });
 });
