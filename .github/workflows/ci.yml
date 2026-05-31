@@ -95,6 +95,9 @@ jobs:
           node-version: "22"
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - name: Build kenya-locations (required for type resolution)
+        run: pnpm build
+        working-directory: packages/js
       - run: pnpm lint
       - run: pnpm build
       - run: pnpm test
