@@ -1,0 +1,41 @@
+name: Publish All Packages
+
+on:
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  # npm: kenya-locations
+  publish-js:
+    name: JS → npm
+    uses: ./.github/workflows/publish-js.yml
+    secrets: inherit
+    permissions:
+      contents: write
+      id-token: write
+
+  # npm: kenya-locations-react
+  publish-react:
+    name: React → npm
+    uses: ./.github/workflows/publish-react.yml
+    secrets: inherit
+    permissions:
+      contents: write
+      id-token: write
+
+  # Maven Central: io.github.davidamunga:kenya-locations
+  publish-kotlin:
+    name: Kotlin → Maven Central
+    uses: ./.github/workflows/publish-kotlin.yml
+    secrets: inherit
+    permissions:
+      contents: write
+
+  # Swift Package Index: tag-based release
+  publish-swift:
+    name: Swift → GitHub tag
+    uses: ./.github/workflows/publish-swift.yml
+    secrets: inherit
+    permissions:
+      contents: write

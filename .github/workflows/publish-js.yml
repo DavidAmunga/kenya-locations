@@ -2,6 +2,7 @@ name: Publish JS to npm
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -45,11 +46,9 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Publish to npm
-        working-directory: ${{ github.workspace }}
-        run: pnpm changeset publish
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"
 
       - name: Publish GitHub draft release
         run: |

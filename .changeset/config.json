@@ -7,7 +7,7 @@
     }
   ],
   "commit": false,
-  "fixed": [["kenya-locations", "kenya-locations-kotlin", "kenya-locations-swift"]],
+  "fixed": [["kenya-locations", "kenya-locations-react", "kenya-locations-kotlin", "kenya-locations-swift"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
