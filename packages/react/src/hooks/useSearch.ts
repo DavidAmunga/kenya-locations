@@ -69,10 +69,11 @@ export function useSearch(
     return () => clearTimeout(timer);
   }, [query, debounceMs]);
 
+  const typesKey = JSON.stringify(types);
   const results = useMemo(
     () => search(debouncedQuery, { limit, types }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [debouncedQuery, limit, JSON.stringify(types)]
+    [debouncedQuery, limit, typesKey] // typesKey serialises the array for stable comparison
   );
 
   return { results, isPending };
