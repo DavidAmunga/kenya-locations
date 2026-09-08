@@ -65,6 +65,10 @@ function resultMeta(result: SearchResult): string {
       return result.item.constituency;
     case "area":
       return `${result.item.locality}, ${result.item.county}`;
+    default: {
+      const _never: never = result;
+      return String(_never);
+    }
   }
 }
 
