@@ -63,5 +63,4 @@ jobs:
           ] = True
           path.write_text(json.dumps(data))
           PY
-          npx firebase-tools experiments:disable dangerouslyAllowFunctionsConfig
           npx firebase-tools deploy --only functions:submitArea --project kenya-locations --non-interactive

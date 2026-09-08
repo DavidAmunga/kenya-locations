@@ -21,4 +21,3 @@ cp apps/web/env.example apps/web/.env
 
 Restart `pnpm start` after changing `.env`. The form posts to `/api/submit-area`; Vite forwards that to Notion.
 
-Submissions also require **reCAPTCHA v2**. Create keys at [google.com/recaptcha/admin](https://www.google.com/recaptcha/admin) (checkbox, “I’m not a robot”). Add `localhost` and `kenya-locations.web.app` as domains. Put the **site key** in `VITE_RECAPTCHA_SITE_KEY` and the **secret** in `RECAPTCHA_SECRET_KEY`. The secret stays on the server.
