@@ -575,8 +575,6 @@ pnpm start          # http://localhost:3000
 
 It uses the local `kenya-locations` workspace package, so library changes show up immediately. Area submissions need Notion credentials in `apps/web/.env` — copy `apps/web/env.example`.
 
-Production deploys to Firebase Hosting on merge to `main` when `apps/web`, `packages/js`, or `data` change. Pull requests get a preview URL. See [apps/web/README.md](apps/web/README.md) for secrets and manual deploy (`pnpm web:deploy`).
-
 ---
 
 ## Repository Structure

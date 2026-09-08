@@ -27,6 +27,13 @@ jobs:
       - run: pnpm --filter kenya-locations-web build
         env:
           VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KENYA_LOCATIONS }}
+          channelId: live
+          projectId: kenya-locations
+          entryPoint: apps/web
       - name: Install Cloud Function dependencies
         working-directory: apps/web/functions
         run: npm ci
@@ -45,11 +52,16 @@ jobs:
             printf 'NOTION_FEEDBACK_DB=%s\n' "$NOTION_FEEDBACK_DB"
             printf 'RECAPTCHA_SECRET_KEY=%s\n' "$RECAPTCHA_SECRET_KEY"
           } > functions/.env
+          mkdir -p "$HOME/.config/configstore"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path.home() / ".config/configstore/firebase-tools.json"
+          data = json.loads(path.read_text()) if path.exists() else {}
+          data.setdefault("apiEnablementCache", {}).setdefault("kenya-locations", {})[
+              "runtimeconfig.googleapis.com"
+          ] = True
+          path.write_text(json.dumps(data))
+          PY
+          npx firebase-tools experiments:disable dangerouslyAllowFunctionsConfig
           npx firebase-tools deploy --only functions:submitArea --project kenya-locations --non-interactive
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KENYA_LOCATIONS }}
-          channelId: live
-          projectId: kenya-locations
-          entryPoint: apps/web
