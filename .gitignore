@@ -11,11 +11,37 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Flutter (example app)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+/build/
 packages/js/node_modules
 packages/kotlin/build
 packages/kotlin/.gradle
+packages/kotlin/.kotlin
+
+# Example apps
+examples/android/.gradle
+examples/android/build
+examples/android/app/build
+examples/android/.kotlin
+examples/android/local.properties
+examples/android/captures
+examples/flutter/.dart_tool
+examples/flutter/.idea
+examples/flutter/build
+examples/flutter/.flutter-plugins
+examples/flutter/.flutter-plugins-dependencies
+examples/flutter/linux/
+examples/flutter/macos/
+examples/flutter/web/
+examples/flutter/windows/
 apps/web/node_modules
 apps/web/dist
+apps/web/.firebase
+.env
 
 # Swift build artefacts
 .build/

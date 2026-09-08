@@ -4,6 +4,11 @@
   "type": "module",
   "description": "Monorepo for kenya-locations — shared data, JS and Kotlin platform libraries",
   "scripts": {
+    "dev": "pnpm --filter kenya-locations-web dev",
+    "start": "pnpm --filter kenya-locations-web start",
+    "web:build": "pnpm --filter kenya-locations-web build",
+    "web:preview": "pnpm --filter kenya-locations-web preview",
+    "web:deploy": "pnpm web:build && npm install --prefix apps/web/functions && npx firebase-tools deploy --only hosting,functions --config apps/web/firebase.json --project kenya-locations",
     "validate": "node scripts/validate-data.js",
     "build": "pnpm --filter kenya-locations build",
     "test": "pnpm --filter kenya-locations test",

@@ -2,6 +2,8 @@
 
 See the [root README](../../README.md) for full documentation, API reference, and installation instructions.
 
+An Android Compose example that includes this library as a Gradle subproject lives in [`examples/android`](../../examples/android).
+
 ## Local development
 
 ```bash

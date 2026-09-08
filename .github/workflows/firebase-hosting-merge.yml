@@ -1,0 +1,54 @@
+# Deploy the interactive demo to https://kenya-locations.web.app on merge to main.
+name: Deploy to Firebase Hosting on merge
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/web/**"
+      - "packages/js/**"
+      - "data/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/firebase-hosting-merge.yml"
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter kenya-locations-web build
+        env:
+          VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+      - name: Install Cloud Function dependencies
+        working-directory: apps/web/functions
+        run: npm ci
+      - name: Deploy Cloud Function
+        working-directory: apps/web
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KENYA_LOCATIONS }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+          NOTION_API_KEY: ${{ secrets.VITE_NOTION_API_KEY }}
+          NOTION_FEEDBACK_DB: ${{ secrets.VITE_NOTION_FEEDBACK_DB }}
+          RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
+        run: |
+          printenv FIREBASE_SA > "$GOOGLE_APPLICATION_CREDENTIALS"
+          {
+            printf 'NOTION_API_KEY=%s\n' "$NOTION_API_KEY"
+            printf 'NOTION_FEEDBACK_DB=%s\n' "$NOTION_FEEDBACK_DB"
+            printf 'RECAPTCHA_SECRET_KEY=%s\n' "$RECAPTCHA_SECRET_KEY"
+          } > functions/.env
+          npx firebase-tools deploy --only functions:submitArea --project kenya-locations --non-interactive
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KENYA_LOCATIONS }}
+          channelId: live
+          projectId: kenya-locations
+          entryPoint: apps/web

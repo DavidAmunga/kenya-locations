@@ -17,6 +17,7 @@ jobs:
       react: ${{ steps.filter.outputs.react }}
       kotlin: ${{ steps.filter.outputs.kotlin }}
       swift: ${{ steps.filter.outputs.swift }}
+      web: ${{ steps.filter.outputs.web }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -36,6 +37,10 @@ jobs:
               - 'data/**'
             swift:
               - 'packages/swift/**'
+              - 'data/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/js/**'
               - 'data/**'
 
   # ── Validate shared data ───────────────────────────────────────────────────
@@ -124,6 +129,22 @@ jobs:
         run: ./gradlew build
       - name: Test
         run: ./gradlew test
+
+  # ── Web demo ──────────────────────────────────────────────────────────────
+  ci-web:
+    name: Web — Build
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter kenya-locations-web build
 
   # ── Swift package ─────────────────────────────────────────────────────────
   ci-swift:

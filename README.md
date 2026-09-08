@@ -73,6 +73,13 @@ targets: [
 
 Requires Swift 5.9+ / iOS 13+ / macOS 10.15+. Data loads lazily from the app bundle on first access.
 
+### Example apps
+
+| App | Path | Uses |
+| --- | --- | --- |
+| Android (Compose) | [`examples/android`](examples/android) | Kotlin library (`packages/kotlin`) |
+| Flutter | [`examples/flutter`](examples/flutter) | Shared JSON in `data/` — Dart cannot import the Maven JAR |
+
 ---
 
 ## Quick Start
@@ -553,7 +560,22 @@ data/
 └── area.json
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for data structure, validation rules, and submission guidelines. Submit new areas via the [web app](https://kenya-locations.web.app/) or directly via a PR.
+See [packages/js/CONTRIBUTING.md](packages/js/CONTRIBUTING.md) for data structure, validation rules, and submission guidelines. Submit new areas via the [web app](https://kenya-locations.web.app/) or directly via a PR.
+
+---
+
+## Website
+
+The interactive demo lives in `apps/web` and is published at [kenya-locations.web.app](https://kenya-locations.web.app). The UI is built with [coss ui](https://coss.com/ui) on Base UI.
+
+```bash
+pnpm install
+pnpm start          # http://localhost:3000
+```
+
+It uses the local `kenya-locations` workspace package, so library changes show up immediately. Area submissions need Notion credentials in `apps/web/.env` — copy `apps/web/env.example`.
+
+Production deploys to Firebase Hosting on merge to `main` when `apps/web`, `packages/js`, or `data` change. Pull requests get a preview URL. See [apps/web/README.md](apps/web/README.md) for secrets and manual deploy (`pnpm web:deploy`).
 
 ---
 
@@ -569,6 +591,9 @@ kenya-locations/
 │   └── swift/               ← Swift library → Swift Package Index: KenyaLocations
 ├── apps/
 │   └── web/                 ← interactive demo (kenya-locations.web.app)
+├── examples/
+│   ├── android/             ← Compose app using the Kotlin library
+│   └── flutter/             ← Flutter app reading the shared JSON
 └── scripts/
     └── validate-data.js     ← data integrity checks (runs on commit + CI)
 ```
